@@ -1,6 +1,8 @@
 #ifndef MSP_PROTOCOL_H
 #define MSP_PROTOCOL_H
 
+#include <stdint.h>
+
 /************************************** MultiWii Serial Protocol *******************************************************/
 // Multiwii Serial Protocol 0 
 #define MSP_VERSION              0
@@ -71,7 +73,20 @@
 #define MSP_DEBUGMSG             253   //out message         debug string buffer
 #define MSP_DEBUG                254   //out message         debug1,debug2,debug3,debug4
 
+typedef struct {
+  int32_t  EstAlt;             // in cm
+  int16_t  vario;              // variometer in cm/s
+} alt_t;
+
+typedef struct {
+  int16_t angle[2];            // absolute angle inclination in multiple of 0.1 degree    180 deg = 1800
+  int16_t heading;             // variometer in cm/s
+} att_t;
+
+void msp_init();
 void msp_arm();
 void msp_disarm();
+void msp_get_att(att_t* att_info);
+void msp_get_alt(alt_t* alt_info);
 
 #endif

@@ -9,6 +9,10 @@ using namespace std;
 int main()
 {
     serial_init();
+    msp_init();
+
+    att_t att;
+    alt_t alt;
     
     while(1)
     {
@@ -24,6 +28,22 @@ int main()
             {
                 cout << "disarming" << endl;
                 msp_disarm();
+            }
+            else if(!strncmp("i", user_input, 1))
+            {
+                cout << "show info" << endl;
+                
+                msp_get_att(&att);
+                msp_get_alt(&alt);
+                
+                cout << "attitude info" << endl;
+                cout << "angle1 : " << att.angle[0] << endl;
+                cout << "angle2 : " << att.angle[1] << endl;
+                cout << "heading : " << att.heading << endl;
+
+                cout << "altitude info" << endl;
+                cout << "EstAlt : " << alt.EstAlt << endl;
+                cout << "vario : " << alt.vario << endl;
             }
             else if(!strncmp("q", user_input, 1))
             {
