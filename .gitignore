@@ -34,6 +34,7 @@
 *.exe
 *.out
 *.app
+simple_msp_gcs
 
 ### CMake ###
 CMakeCache.txt
