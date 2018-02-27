@@ -48,7 +48,4 @@ compile_commands.json
 CTestTestfile.cmake
 build
 
-### submodules ###
-nanogui-sdl
-
 # End of https://www.gitignore.io/api/c++,cmake
