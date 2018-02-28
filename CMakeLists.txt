@@ -10,7 +10,7 @@ aux_source_directory( "." SRCS)
 add_executable( ${CMAKE_PROJECT_NAME} ${SRCS} )
 
 set( GCC_COVERAGE_COMPILE_FLAGS -DSTANDALONE -D__STDC_CONSTANT_MACROS -pipe -Werror -g -Wall -Wno-unused-result )
-set( GCC_COVERAGE_LINK_FLAGS -lpthread)
+set( GCC_COVERAGE_LINK_FLAGS -lpthread -lSDL2main -lSDL2 )
 
 target_compile_options( ${CMAKE_PROJECT_NAME} PRIVATE ${GCC_COVERAGE_COMPILE_FLAGS} )
 target_link_libraries( ${CMAKE_PROJECT_NAME} ${GCC_COVERAGE_LINK_FLAGS} nanogui ${NANOGUISDL_EXTRA_LIBS} )

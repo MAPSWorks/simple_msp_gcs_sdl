@@ -48,4 +48,6 @@ compile_commands.json
 CTestTestfile.cmake
 build
 
+tags
+
 # End of https://www.gitignore.io/api/c++,cmake
