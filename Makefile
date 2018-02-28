@@ -123,6 +123,33 @@ simple_msp_gcs/fast:
 	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/build
 .PHONY : simple_msp_gcs/fast
 
+gui/gui.o: gui/gui.cpp.o
+
+.PHONY : gui/gui.o
+
+# target to build an object file
+gui/gui.cpp.o:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/gui/gui.cpp.o
+.PHONY : gui/gui.cpp.o
+
+gui/gui.i: gui/gui.cpp.i
+
+.PHONY : gui/gui.i
+
+# target to preprocess a source file
+gui/gui.cpp.i:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/gui/gui.cpp.i
+.PHONY : gui/gui.cpp.i
+
+gui/gui.s: gui/gui.cpp.s
+
+.PHONY : gui/gui.s
+
+# target to generate assembly for a file
+gui/gui.cpp.s:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/gui/gui.cpp.s
+.PHONY : gui/gui.cpp.s
+
 msp_protocol/msp_protocol.o: msp_protocol/msp_protocol.cpp.o
 
 .PHONY : msp_protocol/msp_protocol.o
@@ -213,6 +240,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... simple_msp_gcs"
+	@echo "... gui/gui.o"
+	@echo "... gui/gui.i"
+	@echo "... gui/gui.s"
 	@echo "... msp_protocol/msp_protocol.o"
 	@echo "... msp_protocol/msp_protocol.i"
 	@echo "... msp_protocol/msp_protocol.s"

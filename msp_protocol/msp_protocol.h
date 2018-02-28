@@ -83,10 +83,19 @@ typedef struct {
   int16_t heading;             // variometer in cm/s
 } att_t;
 
+typedef struct {
+  int16_t  accSmooth[3];
+  int16_t  gyroData[3];
+  int16_t  magADC[3];
+  int16_t  gyroADC[3];
+  int16_t  accADC[3];
+} imu_t;
+
 void msp_init();
 void msp_arm();
 void msp_disarm();
 void msp_get_att(att_t* att_info);
 void msp_get_alt(alt_t* alt_info);
+void msp_get_imu(imu_t* imu_info);
 
 #endif

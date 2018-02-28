@@ -1,5 +1,6 @@
 #include "./serial_setup/serial_setup.h"
 #include "./msp_protocol/msp_protocol.h"
+#include "./gui/gui.h"
 
 #include <stdint.h>
 #include <iostream>
@@ -7,6 +8,7 @@
 #include <string.h>
 
 using namespace std;
+using namespace nanogui;
 
 #include <SDL2/SDL.h>
 
@@ -15,18 +17,46 @@ int main()
     serial_init();
     msp_init();
 
-    SDL_Init(SDL_INIT_VIDEO);
-
-    SDL_Window * window = SDL_CreateWindow("SDL2 Keyboard/Mouse events"
-            , SDL_WINDOWPOS_UNDEFINED
-            , SDL_WINDOWPOS_UNDEFINED
-            , 640
-            , 480
-            , 0);
-
     att_t att;
     alt_t alt;
+    imu_t imu;
 
+    gui_init();
+
+    FormHelper* gui = gui_get_pointer();
+
+    gui->addGroup("attitude info");
+    gui->addVariable("angle0", att.angle[0]);
+    gui->addVariable("angle1", att.angle[1]);
+    gui->addVariable("heading", att.heading);
+
+    gui->addGroup("altitude info");
+    gui->addVariable("EstAlt", alt.EstAlt);
+    gui->addVariable("vario", alt.vario);
+
+    gui->addGroup("Raw sensor data");
+    gui->addVariable("accSmooth 0", imu.accSmooth[0]);
+    gui->addVariable("accSmooth 1", imu.accSmooth[1]);
+    gui->addVariable("accSmooth 2", imu.accSmooth[2]);
+
+    gui->addVariable("gyroData 0", imu.gyroData[0]);
+    gui->addVariable("gyroData 1", imu.gyroData[1]);
+    gui->addVariable("gyroData 2", imu.gyroData[2]);
+
+    gui->addVariable("magADC 0", imu.magADC[0]);
+    gui->addVariable("magADC 1", imu.magADC[1]);
+    gui->addVariable("magADC 2", imu.magADC[2]);
+    
+    gui->addVariable("gyroADC 0", imu.gyroADC[0]);
+    gui->addVariable("gyroADC 1", imu.gyroADC[1]);
+    gui->addVariable("gyroADC 2", imu.gyroADC[2]);
+    
+    gui->addVariable("accADC 0", imu.accADC[0]);
+    gui->addVariable("accADC 1", imu.accADC[1]);
+    gui->addVariable("accADC 2", imu.accADC[2]);
+
+    gui_set_done();
+    
     bool quit = false;
     SDL_Event event;
 
@@ -80,6 +110,7 @@ int main()
 
                         msp_get_att(&att);
                         msp_get_alt(&alt);
+                        msp_get_imu(&imu);
 
                         cout << "attitude info" << endl;
                         cout << "angle1 : " << att.angle[0] << endl;
@@ -89,15 +120,41 @@ int main()
                         cout << "altitude info" << endl;
                         cout << "EstAlt : " << alt.EstAlt << endl;
                         cout << "vario : " << alt.vario << endl;
+
+                        cout << "accSmooth\n" 
+                             << imu.accSmooth[0] << '\n' 
+                             << imu.accSmooth[1] << '\n' 
+                             << imu.accSmooth[2] << '\n' 
+                             << "gyroData\n"
+                             << imu.gyroData[0] << '\n'
+                             << imu.gyroData[1] << '\n'
+                             << imu.gyroData[2] << '\n'
+                             << "magADC\n"
+                             << imu.magADC[0] << '\n'
+                             << imu.magADC[1] << '\n'
+                             << imu.magADC[2] << '\n'
+                             << "gyroADC\n"
+                             << imu.gyroADC[0] << '\n'
+                             << imu.gyroADC[1] << '\n'
+                             << imu.gyroADC[2] << '\n'
+                             << "accADC\n"
+                             << imu.accADC[0] << '\n'
+                             << imu.accADC[1] << '\n'
+                             << imu.accADC[2] << endl;
                         break;                    
                 }
             }
 
             pre_key_state[i] = key_state[i];
         }
+        
+        msp_get_att(&att);
+        msp_get_alt(&alt);
+        msp_get_imu(&imu);
+
+        gui_draw(event);
     }
 
-    SDL_DestroyWindow(window);
     serial_deinit();
     return 0;
 }

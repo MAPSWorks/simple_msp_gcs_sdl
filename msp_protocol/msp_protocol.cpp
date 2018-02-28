@@ -7,6 +7,7 @@
 
 static att_t att;
 static alt_t alt;
+static imu_t imu;
 
 enum
 {
@@ -130,6 +131,10 @@ static void* send_msp_thread(void* arg)
                 msp_write_cmd(MSP_ALTITUDE);
                 cmd_state++;
                 break;
+            case 2:
+                msp_write_cmd(MSP_RAW_IMU);
+                cmd_state++;
+                break;
             default :
                 cmd_state = 0;
                 break;
@@ -156,6 +161,9 @@ static void* received_msp_thread(void* arg)
                     break;
                 case MSP_ALTITUDE:
                     memcpy((uint8_t*)&alt, received_buf, received_size);
+                    break;
+                case MSP_RAW_IMU:
+                    memcpy((uint8_t*)&imu, received_buf, received_size);
                     break;
                 default :
                     break;
@@ -201,4 +209,9 @@ void msp_get_att(att_t* att_info)
 void msp_get_alt(alt_t* alt_info)
 {
     memcpy(alt_info, &alt, sizeof(alt_t));
+}
+
+void msp_get_imu(imu_t* imu_info)
+{
+    memcpy(imu_info, &imu, sizeof(imu_t));
 }
