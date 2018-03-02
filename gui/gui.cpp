@@ -17,7 +17,6 @@ static int winHeight;
 
 static SDL_Window* window;
 static Screen* screen;
-static ref<Window> rwindow;
 static FormHelper* gui;
 
 void gui_init()
@@ -90,14 +89,12 @@ void gui_init()
     screen = new Screen( window, Vector2i(winWidth, winHeight), "NanoGUI test");
 
     gui = new FormHelper(screen);
-    rwindow = gui->addWindow(Eigen::Vector2i(10, 10), "Simple MSP GCS");
 }
 
 void gui_set_done()
 {
     screen->setVisible(true);
     screen->performLayout();
-    rwindow->center();
 }
 
 void gui_draw(SDL_Event e)

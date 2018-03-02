@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 #include <iostream>
+#include <chrono>
+#include <ctime>
 #include <stdio.h>
 #include <string.h>
 
@@ -24,7 +26,8 @@ int main()
     gui_init();
 
     FormHelper* gui = gui_get_pointer();
-
+    
+    nanogui::ref<Window> rwindow = gui->addWindow(Eigen::Vector2i(10, 10), "Attitude and Altitude info");
     gui->addGroup("attitude info");
     gui->addVariable("angle0", att.angle[0]);
     gui->addVariable("angle1", att.angle[1]);
@@ -34,6 +37,7 @@ int main()
     gui->addVariable("EstAlt", alt.EstAlt);
     gui->addVariable("vario", alt.vario);
 
+    nanogui::ref<Window> rwindow2 = gui->addWindow(Eigen::Vector2i(210, 10), "Raw sensor data");
     gui->addGroup("Raw sensor data");
     gui->addVariable("accSmooth 0", imu.accSmooth[0]);
     gui->addVariable("accSmooth 1", imu.accSmooth[1]);
@@ -54,11 +58,13 @@ int main()
     gui->addVariable("accADC 0", imu.accADC[0]);
     gui->addVariable("accADC 1", imu.accADC[1]);
     gui->addVariable("accADC 2", imu.accADC[2]);
-
+    
     gui_set_done();
     
     bool quit = false;
     SDL_Event event;
+    
+    auto pre_t = chrono::high_resolution_clock::now();
 
     while(!quit)
     {
@@ -148,11 +154,21 @@ int main()
             pre_key_state[i] = key_state[i];
         }
         
-        msp_get_att(&att);
-        msp_get_alt(&alt);
-        msp_get_imu(&imu);
+        auto current_t = chrono::high_resolution_clock::now();
 
-        gui_draw(event);
+        auto elapsed = chrono::duration_cast<chrono::milliseconds>(current_t - pre_t);
+
+        if(elapsed.count() > 10)
+        {
+            msp_get_att(&att);
+            msp_get_alt(&alt);
+            msp_get_imu(&imu);
+            gui->refresh();
+
+            gui_draw(event);
+            
+            pre_t = chrono::high_resolution_clock::now();
+        }
     }
 
     serial_deinit();

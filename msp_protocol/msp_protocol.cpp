@@ -9,6 +9,9 @@ static att_t att;
 static alt_t alt;
 static imu_t imu;
 
+static uint8_t msp_arm_request = 0;
+static uint8_t msp_disarm_request = 0;
+
 enum
 {
     WAIT_$ = 0,
@@ -124,14 +127,26 @@ static void* send_msp_thread(void* arg)
         switch(cmd_state)
         {
             case 0:
+                if(msp_arm_request)
+                {
+                    msp_write_cmd(MSP_ARM);
+                    msp_arm_request = 0;
+                }
+                if(msp_disarm_request)
+                {
+                    msp_write_cmd(MSP_DISARM);
+                    msp_disarm_request = 0;
+                }
+                cmd_state++;
+            case 1:
                 msp_write_cmd(MSP_ATTITUDE);
                 cmd_state++;
                 break;
-            case 1:
+            case 2:
                 msp_write_cmd(MSP_ALTITUDE);
                 cmd_state++;
                 break;
-            case 2:
+            case 3:
                 msp_write_cmd(MSP_RAW_IMU);
                 cmd_state++;
                 break;
@@ -140,7 +155,7 @@ static void* send_msp_thread(void* arg)
                 break;
         }
 
-        usleep(1000);
+        usleep(10000);
     }
 }
 
@@ -193,12 +208,12 @@ void msp_init()
 
 void msp_arm()
 {
-    msp_write_cmd(MSP_ARM);
+    msp_arm_request = 1;
 }
 
 void msp_disarm()
 {
-    msp_write_cmd(MSP_DISARM);
+    msp_disarm_request = 1;
 }
 
 void msp_get_att(att_t* att_info)
