@@ -94,8 +94,12 @@ typedef struct {
 void msp_init();
 void msp_arm();
 void msp_disarm();
+void msp_acc_calib();
+void msp_mag_calib();
+void msp_eeprom_write();
 void msp_get_att(att_t* att_info);
 void msp_get_alt(alt_t* alt_info);
 void msp_get_imu(imu_t* imu_info);
+void msp_get_debug(int16_t* debug_info);
 
 #endif

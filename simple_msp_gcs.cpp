@@ -22,12 +22,13 @@ int main()
     att_t att;
     alt_t alt;
     imu_t imu;
+    int16_t debug[4] = {0, };
 
     gui_init();
 
     FormHelper* gui = gui_get_pointer();
     
-    nanogui::ref<Window> rwindow = gui->addWindow(Eigen::Vector2i(10, 10), "Attitude and Altitude info");
+    nanogui::ref<Window> rwindow = gui->addWindow(Eigen::Vector2i(10, 10), "Basic info");
     gui->addGroup("attitude info");
     gui->addVariable("angle0", att.angle[0]);
     gui->addVariable("angle1", att.angle[1]);
@@ -36,6 +37,12 @@ int main()
     gui->addGroup("altitude info");
     gui->addVariable("EstAlt", alt.EstAlt);
     gui->addVariable("vario", alt.vario);
+
+    gui->addGroup("Debug Data");
+    gui->addVariable("Debug[0]", debug[0]);
+    gui->addVariable("Debug[1]", debug[1]);
+    gui->addVariable("Debug[2]", debug[2]);
+    gui->addVariable("Debug[3]", debug[3]);
 
     nanogui::ref<Window> rwindow2 = gui->addWindow(Eigen::Vector2i(210, 10), "Raw sensor data");
     gui->addGroup("Raw sensor data");
@@ -58,6 +65,36 @@ int main()
     gui->addVariable("accADC 0", imu.accADC[0]);
     gui->addVariable("accADC 1", imu.accADC[1]);
     gui->addVariable("accADC 2", imu.accADC[2]);
+
+    nanogui::ref<Window> rwindow3 = gui->addWindow(Eigen::Vector2i(10, 385), "Arming");
+    gui->addGroup("Arming");
+    gui->addButton("Arm", []()
+            {
+                std::cout << "Arm" << std::endl;
+                msp_arm();
+            });
+    gui->addButton("Disarm", []()
+            {
+                std::cout << "Disarm" << std::endl;
+                msp_disarm();
+            });
+    gui->addGroup("Calibration");
+    gui->addButton("Acc calibration", []()
+            {
+                std::cout << "Acc calibration" << std::endl;
+                msp_acc_calib();
+            });
+    gui->addButton("Mag calibration", []()
+            {
+                std::cout << "Mag calibration" << std::endl;
+                msp_mag_calib();
+            });
+    gui->addGroup("Save setting");
+    gui->addButton("EEPROM write", []()
+            {
+                std::cout << "EEPROM write" << std::endl;
+                msp_eeprom_write();
+            });
     
     gui_set_done();
     
@@ -163,6 +200,7 @@ int main()
             msp_get_att(&att);
             msp_get_alt(&alt);
             msp_get_imu(&imu);
+            msp_get_debug(debug);
             gui->refresh();
 
             gui_draw(event);

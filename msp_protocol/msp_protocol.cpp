@@ -8,9 +8,13 @@
 static att_t att;
 static alt_t alt;
 static imu_t imu;
+static int16_t debug[4];
 
 static uint8_t msp_arm_request = 0;
 static uint8_t msp_disarm_request = 0;
+static uint8_t msp_acc_calib_request = 0;
+static uint8_t msp_mag_calib_request = 0;
+static uint8_t msp_eeprom_write_request = 0;
 
 enum
 {
@@ -150,6 +154,26 @@ static void* send_msp_thread(void* arg)
                 msp_write_cmd(MSP_RAW_IMU);
                 cmd_state++;
                 break;
+            case 4:
+                msp_write_cmd(MSP_DEBUG);
+                cmd_state++;
+            case 5:
+                if(msp_acc_calib_request)
+                {
+                    msp_write_cmd(MSP_ACC_CALIBRATION);
+                    msp_acc_calib_request = 0;
+                }
+                if(msp_mag_calib_request)
+                {
+                    msp_write_cmd(MSP_MAG_CALIBRATION);
+                    msp_mag_calib_request = 0;
+                }
+                if(msp_eeprom_write_request)
+                {
+                    msp_write_cmd(MSP_EEPROM_WRITE);
+                    msp_eeprom_write_request = 0;
+                }
+                cmd_state++;
             default :
                 cmd_state = 0;
                 break;
@@ -180,6 +204,8 @@ static void* received_msp_thread(void* arg)
                 case MSP_RAW_IMU:
                     memcpy((uint8_t*)&imu, received_buf, received_size);
                     break;
+                case MSP_DEBUG:
+                    memcpy((uint8_t*)debug, received_buf, received_size);
                 default :
                     break;
             }
@@ -216,6 +242,21 @@ void msp_disarm()
     msp_disarm_request = 1;
 }
 
+void msp_acc_calib()
+{
+    msp_acc_calib_request = 1;
+}
+
+void msp_mag_calib()
+{
+    msp_mag_calib_request = 1;
+}
+
+void msp_eeprom_write()
+{
+    msp_eeprom_write_request = 1;
+}
+
 void msp_get_att(att_t* att_info)
 {
     memcpy(att_info, &att, sizeof(att_t));
@@ -229,4 +270,9 @@ void msp_get_alt(alt_t* alt_info)
 void msp_get_imu(imu_t* imu_info)
 {
     memcpy(imu_info, &imu, sizeof(imu_t));
+}
+
+void msp_get_debug(int16_t* debug_info)
+{
+    memcpy(debug_info, debug, sizeof(debug));
 }
