@@ -14,14 +14,16 @@ using namespace nanogui;
 
 #include <SDL2/SDL.h>
 
+#define MAX_PLOT_SIZE 100
+
 int main()
 {
     serial_init();
     msp_init();
 
-    att_t att;
-    alt_t alt;
-    imu_t imu;
+    att_t att = {0, };
+    alt_t alt = {0, };
+    imu_t imu = {0, };
     int16_t debug[4] = {0, };
 
     gui_init();
@@ -95,6 +97,27 @@ int main()
                 std::cout << "EEPROM write" << std::endl;
                 msp_eeprom_write();
             });
+
+    nanogui::ref<Window> rwindow4 = gui->addWindow(Eigen::Vector2i(410, 10), "Plot");
+    rwindow4->setLayout( new GroupLayout() );
+    
+    rwindow4->add<Label>("Altitude plot", "sans-bold");
+    nanogui::Graph* graph1 = rwindow4->add<nanogui::Graph>("Altitude");
+    Eigen::VectorXf& altitude_func = graph1->values();
+    altitude_func.resize(MAX_PLOT_SIZE);
+
+    rwindow4->add<Label>("Attitude plot", "sans-bold");
+    nanogui::Graph* graph2 = rwindow4->add<nanogui::Graph>("ROLL");
+    Eigen::VectorXf& attitude_roll = graph2->values();
+    attitude_roll.resize(MAX_PLOT_SIZE);
+
+    nanogui::Graph* graph3 = rwindow4->add<nanogui::Graph>("PITCH");
+    Eigen::VectorXf& attitude_pitch = graph3->values();
+    attitude_pitch.resize(MAX_PLOT_SIZE);
+    
+    nanogui::Graph* graph4 = rwindow4->add<nanogui::Graph>("YAW");
+    Eigen::VectorXf& attitude_yaw = graph4->values();
+    attitude_yaw.resize(MAX_PLOT_SIZE);
     
     gui_set_done();
     
@@ -195,12 +218,24 @@ int main()
 
         auto elapsed = chrono::duration_cast<chrono::milliseconds>(current_t - pre_t);
 
-        if(elapsed.count() > 10)
+        if(elapsed.count() > 16)
         {
             msp_get_att(&att);
             msp_get_alt(&alt);
             msp_get_imu(&imu);
             msp_get_debug(debug);
+            for(uint8_t i = 0; i < MAX_PLOT_SIZE-1; i++)
+            {
+                altitude_func[i]    = altitude_func[i+1];
+                attitude_roll[i]    = attitude_roll[i+1];
+                attitude_pitch[i]   = attitude_pitch[i+1];
+                attitude_yaw[i]     = attitude_yaw[i+1];
+            }
+            altitude_func[MAX_PLOT_SIZE-1] = alt.EstAlt/500.0;
+            attitude_roll[MAX_PLOT_SIZE-1] = att.angle[0]/2000.0+0.5;
+            attitude_pitch[MAX_PLOT_SIZE-1] = att.angle[1]/2000.0+0.5;
+            attitude_yaw[MAX_PLOT_SIZE-1] = att.heading/2000.0+0.5;
+            
             gui->refresh();
 
             gui_draw(event);
