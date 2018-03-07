@@ -234,7 +234,7 @@ int main()
             altitude_func[MAX_PLOT_SIZE-1] = alt.EstAlt/500.0;
             attitude_roll[MAX_PLOT_SIZE-1] = att.angle[0]/2000.0+0.5;
             attitude_pitch[MAX_PLOT_SIZE-1] = att.angle[1]/2000.0+0.5;
-            attitude_yaw[MAX_PLOT_SIZE-1] = att.heading/2000.0+0.5;
+            attitude_yaw[MAX_PLOT_SIZE-1] = att.heading/360.0+0.5;
             
             gui->refresh();
 
