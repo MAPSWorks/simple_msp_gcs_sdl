@@ -290,7 +290,7 @@ int main(int argc, char* argv[])
     Eigen::VectorXf& attitude_yaw = graph4->values();
     attitude_yaw.resize(MAX_PLOT_SIZE);
 
-    nanogui::ref<Window> rwindow5 = gui->addWindow(Eigen::Vector2i(10, 385), "Video Streamming");
+    nanogui::ref<Window> rwindow5 = gui->addWindow(Eigen::Vector2i(210, 455), "Video Streamming");
     gui->addGroup("Request and Stop");
     gui->addButton("Video Request", []()
             {
