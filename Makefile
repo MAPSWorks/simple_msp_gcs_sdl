@@ -177,6 +177,141 @@ msp_protocol/msp_protocol.cpp.s:
 	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/msp_protocol/msp_protocol.cpp.s
 .PHONY : msp_protocol/msp_protocol.cpp.s
 
+rpi-udp-stream-client/common_util/common_util.o: rpi-udp-stream-client/common_util/common_util.cpp.o
+
+.PHONY : rpi-udp-stream-client/common_util/common_util.o
+
+# target to build an object file
+rpi-udp-stream-client/common_util/common_util.cpp.o:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/common_util/common_util.cpp.o
+.PHONY : rpi-udp-stream-client/common_util/common_util.cpp.o
+
+rpi-udp-stream-client/common_util/common_util.i: rpi-udp-stream-client/common_util/common_util.cpp.i
+
+.PHONY : rpi-udp-stream-client/common_util/common_util.i
+
+# target to preprocess a source file
+rpi-udp-stream-client/common_util/common_util.cpp.i:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/common_util/common_util.cpp.i
+.PHONY : rpi-udp-stream-client/common_util/common_util.cpp.i
+
+rpi-udp-stream-client/common_util/common_util.s: rpi-udp-stream-client/common_util/common_util.cpp.s
+
+.PHONY : rpi-udp-stream-client/common_util/common_util.s
+
+# target to generate assembly for a file
+rpi-udp-stream-client/common_util/common_util.cpp.s:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/common_util/common_util.cpp.s
+.PHONY : rpi-udp-stream-client/common_util/common_util.cpp.s
+
+rpi-udp-stream-client/computer_vision/color_object_recognition.o: rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.o
+
+.PHONY : rpi-udp-stream-client/computer_vision/color_object_recognition.o
+
+# target to build an object file
+rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.o:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.o
+.PHONY : rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.o
+
+rpi-udp-stream-client/computer_vision/color_object_recognition.i: rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.i
+
+.PHONY : rpi-udp-stream-client/computer_vision/color_object_recognition.i
+
+# target to preprocess a source file
+rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.i:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.i
+.PHONY : rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.i
+
+rpi-udp-stream-client/computer_vision/color_object_recognition.s: rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.s
+
+.PHONY : rpi-udp-stream-client/computer_vision/color_object_recognition.s
+
+# target to generate assembly for a file
+rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.s:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.s
+.PHONY : rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.s
+
+rpi-udp-stream-client/computer_vision/imshow_queue.o: rpi-udp-stream-client/computer_vision/imshow_queue.cpp.o
+
+.PHONY : rpi-udp-stream-client/computer_vision/imshow_queue.o
+
+# target to build an object file
+rpi-udp-stream-client/computer_vision/imshow_queue.cpp.o:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/computer_vision/imshow_queue.cpp.o
+.PHONY : rpi-udp-stream-client/computer_vision/imshow_queue.cpp.o
+
+rpi-udp-stream-client/computer_vision/imshow_queue.i: rpi-udp-stream-client/computer_vision/imshow_queue.cpp.i
+
+.PHONY : rpi-udp-stream-client/computer_vision/imshow_queue.i
+
+# target to preprocess a source file
+rpi-udp-stream-client/computer_vision/imshow_queue.cpp.i:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/computer_vision/imshow_queue.cpp.i
+.PHONY : rpi-udp-stream-client/computer_vision/imshow_queue.cpp.i
+
+rpi-udp-stream-client/computer_vision/imshow_queue.s: rpi-udp-stream-client/computer_vision/imshow_queue.cpp.s
+
+.PHONY : rpi-udp-stream-client/computer_vision/imshow_queue.s
+
+# target to generate assembly for a file
+rpi-udp-stream-client/computer_vision/imshow_queue.cpp.s:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/computer_vision/imshow_queue.cpp.s
+.PHONY : rpi-udp-stream-client/computer_vision/imshow_queue.cpp.s
+
+rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.o: rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.o
+
+.PHONY : rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.o
+
+# target to build an object file
+rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.o:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.o
+.PHONY : rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.o
+
+rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.i: rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.i
+
+.PHONY : rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.i
+
+# target to preprocess a source file
+rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.i:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.i
+.PHONY : rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.i
+
+rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.s: rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.s
+
+.PHONY : rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.s
+
+# target to generate assembly for a file
+rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.s:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.s
+.PHONY : rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.cpp.s
+
+rpi-udp-stream-client/udp_setup/udp_setup.o: rpi-udp-stream-client/udp_setup/udp_setup.cpp.o
+
+.PHONY : rpi-udp-stream-client/udp_setup/udp_setup.o
+
+# target to build an object file
+rpi-udp-stream-client/udp_setup/udp_setup.cpp.o:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/udp_setup/udp_setup.cpp.o
+.PHONY : rpi-udp-stream-client/udp_setup/udp_setup.cpp.o
+
+rpi-udp-stream-client/udp_setup/udp_setup.i: rpi-udp-stream-client/udp_setup/udp_setup.cpp.i
+
+.PHONY : rpi-udp-stream-client/udp_setup/udp_setup.i
+
+# target to preprocess a source file
+rpi-udp-stream-client/udp_setup/udp_setup.cpp.i:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/udp_setup/udp_setup.cpp.i
+.PHONY : rpi-udp-stream-client/udp_setup/udp_setup.cpp.i
+
+rpi-udp-stream-client/udp_setup/udp_setup.s: rpi-udp-stream-client/udp_setup/udp_setup.cpp.s
+
+.PHONY : rpi-udp-stream-client/udp_setup/udp_setup.s
+
+# target to generate assembly for a file
+rpi-udp-stream-client/udp_setup/udp_setup.cpp.s:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/udp_setup/udp_setup.cpp.s
+.PHONY : rpi-udp-stream-client/udp_setup/udp_setup.cpp.s
+
 serial_setup/serial_setup.o: serial_setup/serial_setup.cpp.o
 
 .PHONY : serial_setup/serial_setup.o
@@ -246,6 +381,21 @@ help:
 	@echo "... msp_protocol/msp_protocol.o"
 	@echo "... msp_protocol/msp_protocol.i"
 	@echo "... msp_protocol/msp_protocol.s"
+	@echo "... rpi-udp-stream-client/common_util/common_util.o"
+	@echo "... rpi-udp-stream-client/common_util/common_util.i"
+	@echo "... rpi-udp-stream-client/common_util/common_util.s"
+	@echo "... rpi-udp-stream-client/computer_vision/color_object_recognition.o"
+	@echo "... rpi-udp-stream-client/computer_vision/color_object_recognition.i"
+	@echo "... rpi-udp-stream-client/computer_vision/color_object_recognition.s"
+	@echo "... rpi-udp-stream-client/computer_vision/imshow_queue.o"
+	@echo "... rpi-udp-stream-client/computer_vision/imshow_queue.i"
+	@echo "... rpi-udp-stream-client/computer_vision/imshow_queue.s"
+	@echo "... rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.o"
+	@echo "... rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.i"
+	@echo "... rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.s"
+	@echo "... rpi-udp-stream-client/udp_setup/udp_setup.o"
+	@echo "... rpi-udp-stream-client/udp_setup/udp_setup.i"
+	@echo "... rpi-udp-stream-client/udp_setup/udp_setup.s"
 	@echo "... serial_setup/serial_setup.o"
 	@echo "... serial_setup/serial_setup.i"
 	@echo "... serial_setup/serial_setup.s"

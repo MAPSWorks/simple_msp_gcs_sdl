@@ -1,3 +1,6 @@
 [submodule "nanogui-sdl"]
 	path = nanogui-sdl
 	url = https://github.com/whdlgp/nanogui-sdl.git
+[submodule "rpi-udp-stream-client"]
+	path = rpi-udp-stream-client
+	url = https://github.com/whdlgp/rpi-udp-stream-client.git
