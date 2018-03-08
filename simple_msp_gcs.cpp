@@ -14,10 +14,181 @@ using namespace nanogui;
 
 #include <SDL2/SDL.h>
 
+#include "./rpi-udp-stream-client/udp_setup/udp_setup.h"
+#include "./rpi-udp-stream-client/common_util/common_util.h"
+#include "./rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.h"
+#include "./rpi-udp-stream-client/computer_vision/imshow_queue.h"
+#include "./rpi-udp-stream-client/computer_vision/color_object_recognition.h"
+
+#include "opencv2/opencv.hpp"
+using namespace cv;
+
+pthread_t receive_id;
+int receive_status;
+pthread_t keep_alive_id;
+int keep_alive_status;
+
 #define MAX_PLOT_SIZE 100
 
-int main()
+#ifdef SAVE_VIDEO
+#define FILENAME "video.h264"
+#endif
+
+static void sig_int(int arg)
 {
+    DEBUG_MSG("request server close and exit\n");
+    udp_send_command("QUIT_SERVER");
+
+    set_quit();
+    DEBUG_MSG("close and exit client\n");
+    udp_client_command_close();
+    udp_client_stream_close();
+    
+    DEBUG_MSG("wait until thread join\n");
+    pthread_join(receive_id, (void **)&receive_status);
+    pthread_join(keep_alive_id, (void **)&keep_alive_status);
+ 
+    exit(0);
+}
+
+void avframe_mat_conversion(const AVFrame * frame, Mat& image)
+{
+    int width = frame->width;
+    int height = frame->height;
+ 
+    // Allocate the opencv mat and store its stride in a 1-element array
+    if (image.rows != height 
+            || image.cols != width 
+            || image.type() != CV_8UC3)
+    {
+        image = Mat(height, width, CV_8UC3);
+    }
+    
+    int cvLinesizes[1];
+    cvLinesizes[0] = image.step1();
+ 
+    // Convert the colour format and write directly to the opencv matrix
+    SwsContext* conversion = sws_getContext(width
+                                            , height
+                                            , (AVPixelFormat) frame->format
+                                            , width
+                                            , height
+                                            , PIX_FMT_BGR24
+                                            , SWS_FAST_BILINEAR
+                                            , NULL, NULL, NULL);
+    
+    sws_scale(conversion
+              , frame->data
+              , frame->linesize
+              , 0
+              , height
+              , &image.data
+              , cvLinesizes);
+
+    sws_freeContext(conversion);
+}
+
+static void* receive_video_udp(void* arg)
+{
+    uint32_t frame_len;
+    uint8_t frame_buf[FRAME_BUFSIZE];
+
+#ifdef SAVE_VIDEO
+    int fd = open (FILENAME, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0666);
+    if (fd == -1)
+    {
+        DEBUG_ERR("error: open\n");
+        exit(1);
+    }
+#endif
+
+    ffmpeg_decode_init();
+
+    Mat converted_image;
+    imshow_init();
+
+    while(!is_quit())
+    {
+        if(udp_recevie_stream(frame_buf, &frame_len))
+            DEBUG_MSG("frame received size : %d\n", frame_len);
+        
+        AVFrame picture;
+        if(ffmpeg_decode_start(frame_buf, frame_len, &picture))
+        {
+            DEBUG_MSG("YUV frame successfully decoded\n");
+            //DEBUG_MSG("picture linesize 0 : %d\n", picture.linesize[0]);
+            //DEBUG_MSG("picture linesize 1 : %d\n", picture.linesize[1]);
+            //DEBUG_MSG("picture linesize 2 : %d\n", picture.linesize[2]);
+
+            avframe_mat_conversion(&picture, converted_image);
+
+            color_object_t red_obj;
+            color_object_t green_obj;
+            color_object_t blue_obj;
+            find_red_object(converted_image, &red_obj);
+            find_green_object(converted_image, &green_obj);
+            find_blue_object(converted_image, &blue_obj);
+
+            if(red_obj.is_recognized)
+                imshow_request("red_obj", red_obj.thresholded_image);
+            if(green_obj.is_recognized)
+                imshow_request("green_obj", green_obj.thresholded_image);
+            if(blue_obj.is_recognized)
+                imshow_request("blue_obj", blue_obj.thresholded_image);
+            
+            imshow_request("convert", converted_image);
+        }
+
+#ifdef SAVE_VIDEO
+        if (write(fd
+                  , frame_buf
+                  , frame_len) == -1)
+        {
+            DEBUG_ERR("error: write\n");
+            exit(1);
+        }
+#endif
+    }
+
+#ifdef SAVE_VIDEO
+    close(fd);
+#endif
+
+    imshow_close();
+
+    ffmpeg_decode_close();
+    
+    pthread_exit((void *) 0);
+}
+
+static void* keep_alive(void* arg)
+{
+    while(!is_quit())
+    {
+        udp_send_command("SET_TIMEOUT");
+        sleep(1);
+    }
+
+    pthread_exit((void *) 0);
+}
+
+int main(int argc, char* argv[])
+{
+    if(argc != 2) 
+    {
+       DEBUG_ERR("Usage: %s IP_address\n", argv[0]);
+       exit(1);
+    }
+
+    //signal interrupt
+    signal(SIGINT,  sig_int);
+    signal(SIGTERM, sig_int);
+    signal(SIGQUIT, sig_int);
+    
+    udp_set_server_ip(argv[1]);
+    udp_client_command_setup();
+    udp_client_stream_setup();
+
     serial_init();
     msp_init();
 
@@ -118,6 +289,39 @@ int main()
     nanogui::Graph* graph4 = rwindow4->add<nanogui::Graph>("YAW");
     Eigen::VectorXf& attitude_yaw = graph4->values();
     attitude_yaw.resize(MAX_PLOT_SIZE);
+
+    nanogui::ref<Window> rwindow5 = gui->addWindow(Eigen::Vector2i(10, 385), "Video Streamming");
+    gui->addGroup("Request and Stop");
+    gui->addButton("Video Request", []()
+            {
+                udp_send_command("VIDEO_REQUEST");
+
+                pthread_create(&receive_id
+                        , NULL
+                        , receive_video_udp
+                        , (void*)NULL);
+                DEBUG_MSG("receive_video_udp thread created\n");
+
+                pthread_create(&keep_alive_id
+                        , NULL
+                        , keep_alive
+                        , (void*)NULL);
+                DEBUG_MSG("keep_alive thread created\n");
+            });
+        gui->addButton("Stop", []()
+            {
+                DEBUG_MSG("request server close and exit\n");
+                udp_send_command("QUIT_SERVER");
+
+                set_quit();
+                DEBUG_MSG("close and exit client\n");
+                udp_client_command_close();
+                udp_client_stream_close();
+                
+                DEBUG_MSG("wait until thread join\n");
+                pthread_join(receive_id, (void **)&receive_status);
+                pthread_join(keep_alive_id, (void **)&keep_alive_status);
+            });
     
     gui_set_done();
     
