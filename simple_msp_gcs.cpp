@@ -21,16 +21,16 @@ int main()
     serial_init();
     msp_init();
 
-    att_t att = {0, };
-    alt_t alt = {0, };
-    imu_t imu = {0, };
-    int16_t debug[4] = {0, };
+    att_t att = {9999, };
+    alt_t alt = {9999, };
+    imu_t imu = {9999, };
+    int16_t debug[4] = {9999, };
 
     gui_init();
 
     FormHelper* gui = gui_get_pointer();
     
-    nanogui::ref<Window> rwindow = gui->addWindow(Eigen::Vector2i(10, 10), "Basic info");
+    nanogui::ref<Window> rwindow = gui->addWindow(Eigen::Vector2i(10, 10), "Basic information");
     gui->addGroup("attitude info");
     gui->addVariable("angle0", att.angle[0]);
     gui->addVariable("angle1", att.angle[1]);
