@@ -12,10 +12,10 @@ To build this project, you should install below
 * SDL 2.0
 
 ## Install ffmpeg 2.8.13
-[See this wiki]()
+[See this wiki](https://github.com/whdlgp/simple_msp_gcs/wiki/Install-ffmpeg-2.8.13-version)
 
 ## Install OpenCV 2.4.13.5
-[See this wiki]()
+[See this wiki](https://github.com/whdlgp/simple_msp_gcs/wiki/Install-OpenCV-2.4.13.5-version)
 
 ## Install SDL 2.0
 
