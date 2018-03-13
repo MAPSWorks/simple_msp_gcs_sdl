@@ -1,5 +1,5 @@
 #include "gui.h"
-
+#include "../rpi-udp-stream-client/common_util/common_util.h"
 
 extern "C" {
     typedef GLubyte* (APIENTRY * glGetString_Func)(unsigned int);
@@ -55,7 +55,7 @@ void gui_init()
 
     // Create an application window with the following settings:
     window = SDL_CreateWindow(
-      "An SDL2 window",         //    const char* title
+      "Simple MSP GCS",         //    const char* title
       SDL_WINDOWPOS_UNDEFINED,  //    int x: initial x position
       SDL_WINDOWPOS_UNDEFINED,  //    int y: initial y position
       winWidth,                      //    int w: width, in pixels
@@ -81,10 +81,10 @@ void gui_init()
 
     glGetStringAPI = (glGetString_Func)SDL_GL_GetProcAddress("glGetString");
 
-    std::cout << "Available Renderers: " << rendername << std::endl;
-    std::cout << "Vendor     : " << glGetStringAPI(GL_VENDOR) << std::endl;
-    std::cout << "Renderer   : " << glGetStringAPI(GL_RENDERER) << std::endl;
-    std::cout << "Version    : " << glGetStringAPI(GL_VERSION) << std::endl;
+    DEBUG_MSG("Available Renderers: %s\n", rendername);
+    DEBUG_MSG("Vendor     : %s\n", glGetStringAPI(GL_VENDOR));
+    DEBUG_MSG("Renderer   : %s\n", glGetStringAPI(GL_RENDERER));
+    DEBUG_MSG("Version    : %s\n", glGetStringAPI(GL_VERSION));
 
     screen = new Screen( window, Vector2i(winWidth, winHeight), "NanoGUI test");
 

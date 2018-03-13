@@ -4,15 +4,19 @@
 
 #include <stdint.h>
 #include <iostream>
-#include <chrono>
-#include <ctime>
+
 #include <stdio.h>
 #include <string.h>
+
+#include <chrono>
+#include <ctime>
 
 using namespace std;
 using namespace nanogui;
 
 #include <SDL2/SDL.h>
+
+#define MAX_PLOT_SIZE 100
 
 #include "./rpi-udp-stream-client/udp_setup/udp_setup.h"
 #include "./rpi-udp-stream-client/common_util/common_util.h"
@@ -28,11 +32,11 @@ int receive_status;
 pthread_t keep_alive_id;
 int keep_alive_status;
 
-#define MAX_PLOT_SIZE 100
-
 #ifdef SAVE_VIDEO
 #define FILENAME "video.h264"
 #endif
+
+#define USE_DEBUG_MSG
 
 static void sig_int(int arg)
 {
@@ -346,19 +350,19 @@ int main(int argc, char* argv[])
 
         if(key_state[SDL_SCANCODE_LEFT])
         {
-            cout << "left" << endl;
+            DEBUG_MSG("left");
         }
         if(key_state[SDL_SCANCODE_RIGHT])
         {
-            cout << "right" << endl;
+            DEBUG_MSG("right");
         }
         if(key_state[SDL_SCANCODE_UP])
         {
-            cout << "up" << endl;
+            DEBUG_MSG("up");
         }
         if(key_state[SDL_SCANCODE_DOWN])
         {
-            cout << "down" << endl;
+            DEBUG_MSG("donw");
         }
 
         for(uint16_t i = 0; i < SDL_NUM_SCANCODES; i++)
@@ -368,50 +372,13 @@ int main(int argc, char* argv[])
                 switch(i)
                 {
                     case SDL_SCANCODE_A:
-                        cout << "arming" <<endl;
+                        DEBUG_MSG("Arming");
                         msp_arm();
                         break;
                     case SDL_SCANCODE_D:
-                        cout << "disarming" << endl;
+                        DEBUG_MSG("Disarming");
                         msp_disarm();
-                        break;
-                    case SDL_SCANCODE_I:
-                        cout << "show info" << endl;
-
-                        msp_get_att(&att);
-                        msp_get_alt(&alt);
-                        msp_get_imu(&imu);
-
-                        cout << "attitude info" << endl;
-                        cout << "angle1 : " << att.angle[0] << endl;
-                        cout << "angle2 : " << att.angle[1] << endl;
-                        cout << "heading : " << att.heading << endl;
-
-                        cout << "altitude info" << endl;
-                        cout << "EstAlt : " << alt.EstAlt << endl;
-                        cout << "vario : " << alt.vario << endl;
-
-                        cout << "accSmooth\n" 
-                             << imu.accSmooth[0] << '\n' 
-                             << imu.accSmooth[1] << '\n' 
-                             << imu.accSmooth[2] << '\n' 
-                             << "gyroData\n"
-                             << imu.gyroData[0] << '\n'
-                             << imu.gyroData[1] << '\n'
-                             << imu.gyroData[2] << '\n'
-                             << "magADC\n"
-                             << imu.magADC[0] << '\n'
-                             << imu.magADC[1] << '\n'
-                             << imu.magADC[2] << '\n'
-                             << "gyroADC\n"
-                             << imu.gyroADC[0] << '\n'
-                             << imu.gyroADC[1] << '\n'
-                             << imu.gyroADC[2] << '\n'
-                             << "accADC\n"
-                             << imu.accADC[0] << '\n'
-                             << imu.accADC[1] << '\n'
-                             << imu.accADC[2] << endl;
-                        break;                    
+                        break;   
                 }
             }
 

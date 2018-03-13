@@ -10,6 +10,8 @@
 
 using namespace std;
 
+#include "../rpi-udp-stream-client/common_util/common_util.h"
+
 static string found_device;
 static int serial_device_file = -1;
 
@@ -19,7 +21,7 @@ void serial_init()
 
     ostringstream output;
 
-    cout << "Please detach and attach Serial Device" << endl;
+    DEBUG_MSG("Please detach and attach Serial Device\n");
 
     //check dmesg to find new device
     while(!feof(stream) && !ferror(stream))
@@ -71,7 +73,7 @@ void serial_init()
     }
 
     //device find process done
-    cout << "Device found : " << found_device << endl;
+    DEBUG_MSG("Device found : %s\n", found_device);
     sleep(3);
 
     //OPEN THE UART
@@ -90,7 +92,7 @@ void serial_init()
     if(serial_device_file == -1)
     {
         //ERROR - CAN'T OPEN SERIAL PORT
-        cout << "Error - Unable to open UART.  Ensure it is not in use by another application" <<endl;
+        DEBUG_MSG("Error - Unable to open UART.  Ensure it is not in use by another application");
     }    //CONFIGURE THE UART
     //The flags (defined in /usr/include/termios.h - see http://pubs.opengroup.org/onlinepubs/007908799/xsh/termios.h.html):
     //  Baud rate:- B1200, B2400, B4800, B9600, B19200, B38400, B57600, B115200, B230400, B460800, B500000, B576000, B921600, B1000000, B1152000, B1500000, B2000000, B2500000, B3000000, B3500000, B4000000
@@ -110,7 +112,7 @@ void serial_init()
     tcflush(serial_device_file, TCIFLUSH);
     tcsetattr(serial_device_file, TCSANOW, &options);
 
-    cout << "serial initialise done" << endl;
+    DEBUG_MSG("serial initialise done\n");
 }
 
 void serial_deinit()
@@ -118,7 +120,7 @@ void serial_deinit()
     //----- CLOSE THE UART -----
     close(serial_device_file);
 
-    cout << "serial deinitialise done" << endl;
+    DEBUG_MSG("serial deinitialise done\n");
 }
 
 void serial_write(uint8_t chr)
