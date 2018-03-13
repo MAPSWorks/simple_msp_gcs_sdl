@@ -73,7 +73,7 @@ void serial_init()
     }
 
     //device find process done
-    DEBUG_MSG("Device found : %s\n", found_device);
+    DEBUG_MSG("Device found : %s\n", found_device.c_str());
     sleep(3);
 
     //OPEN THE UART

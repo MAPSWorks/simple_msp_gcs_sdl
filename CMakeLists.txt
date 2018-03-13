@@ -11,7 +11,7 @@ aux_source_directory( "./rpi-udp-stream-client/computer_vision" SRCS )
 aux_source_directory( "./rpi-udp-stream-client/udp_setup" SRCS )
 aux_source_directory( "./rpi-udp-stream-client/common_util" SRCS )
 aux_source_directory( "./rpi-udp-stream-client/ffmpeg_setup" SRCS )
-aux_source_directory( "." SRCS )
+aux_source_directory( "./app" SRCS )
 add_executable( ${CMAKE_PROJECT_NAME} ${SRCS} )
 
 find_package( OpenCV REQUIRED )

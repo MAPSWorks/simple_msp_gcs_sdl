@@ -123,6 +123,60 @@ simple_msp_gcs/fast:
 	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/build
 .PHONY : simple_msp_gcs/fast
 
+app/simple_msp_gcs.o: app/simple_msp_gcs.cpp.o
+
+.PHONY : app/simple_msp_gcs.o
+
+# target to build an object file
+app/simple_msp_gcs.cpp.o:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/app/simple_msp_gcs.cpp.o
+.PHONY : app/simple_msp_gcs.cpp.o
+
+app/simple_msp_gcs.i: app/simple_msp_gcs.cpp.i
+
+.PHONY : app/simple_msp_gcs.i
+
+# target to preprocess a source file
+app/simple_msp_gcs.cpp.i:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/app/simple_msp_gcs.cpp.i
+.PHONY : app/simple_msp_gcs.cpp.i
+
+app/simple_msp_gcs.s: app/simple_msp_gcs.cpp.s
+
+.PHONY : app/simple_msp_gcs.s
+
+# target to generate assembly for a file
+app/simple_msp_gcs.cpp.s:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/app/simple_msp_gcs.cpp.s
+.PHONY : app/simple_msp_gcs.cpp.s
+
+app/video_stream_part.o: app/video_stream_part.cpp.o
+
+.PHONY : app/video_stream_part.o
+
+# target to build an object file
+app/video_stream_part.cpp.o:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/app/video_stream_part.cpp.o
+.PHONY : app/video_stream_part.cpp.o
+
+app/video_stream_part.i: app/video_stream_part.cpp.i
+
+.PHONY : app/video_stream_part.i
+
+# target to preprocess a source file
+app/video_stream_part.cpp.i:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/app/video_stream_part.cpp.i
+.PHONY : app/video_stream_part.cpp.i
+
+app/video_stream_part.s: app/video_stream_part.cpp.s
+
+.PHONY : app/video_stream_part.s
+
+# target to generate assembly for a file
+app/video_stream_part.cpp.s:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/app/video_stream_part.cpp.s
+.PHONY : app/video_stream_part.cpp.s
+
 gui/gui.o: gui/gui.cpp.o
 
 .PHONY : gui/gui.o
@@ -339,33 +393,6 @@ serial_setup/serial_setup.cpp.s:
 	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/serial_setup/serial_setup.cpp.s
 .PHONY : serial_setup/serial_setup.cpp.s
 
-simple_msp_gcs.o: simple_msp_gcs.cpp.o
-
-.PHONY : simple_msp_gcs.o
-
-# target to build an object file
-simple_msp_gcs.cpp.o:
-	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/simple_msp_gcs.cpp.o
-.PHONY : simple_msp_gcs.cpp.o
-
-simple_msp_gcs.i: simple_msp_gcs.cpp.i
-
-.PHONY : simple_msp_gcs.i
-
-# target to preprocess a source file
-simple_msp_gcs.cpp.i:
-	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/simple_msp_gcs.cpp.i
-.PHONY : simple_msp_gcs.cpp.i
-
-simple_msp_gcs.s: simple_msp_gcs.cpp.s
-
-.PHONY : simple_msp_gcs.s
-
-# target to generate assembly for a file
-simple_msp_gcs.cpp.s:
-	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/simple_msp_gcs.cpp.s
-.PHONY : simple_msp_gcs.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -375,6 +402,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... simple_msp_gcs"
+	@echo "... app/simple_msp_gcs.o"
+	@echo "... app/simple_msp_gcs.i"
+	@echo "... app/simple_msp_gcs.s"
+	@echo "... app/video_stream_part.o"
+	@echo "... app/video_stream_part.i"
+	@echo "... app/video_stream_part.s"
 	@echo "... gui/gui.o"
 	@echo "... gui/gui.i"
 	@echo "... gui/gui.s"
@@ -399,9 +432,6 @@ help:
 	@echo "... serial_setup/serial_setup.o"
 	@echo "... serial_setup/serial_setup.i"
 	@echo "... serial_setup/serial_setup.s"
-	@echo "... simple_msp_gcs.o"
-	@echo "... simple_msp_gcs.i"
-	@echo "... simple_msp_gcs.s"
 .PHONY : help
 
 
