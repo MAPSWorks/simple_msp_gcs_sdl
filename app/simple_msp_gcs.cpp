@@ -25,6 +25,9 @@ static FormHelper* gui;
 static att_t att = {9999, };
 static alt_t alt = {9999, };
 static imu_t imu = {9999, };
+static msp_status_t msp_status = {0, };
+static uint8_t is_armed = 0;
+static uint8_t is_baromode = 0;
 static int16_t debug[4] = {9999, };
 
 static Eigen::VectorXf* altitude_func_ptr;
@@ -61,6 +64,10 @@ static void app_init()
     gui = gui_get_pointer();
 
     nanogui::ref<Window> rwindow = gui->addWindow(Eigen::Vector2i(10, 10), "Basic information");
+    gui->addGroup("Status info");
+    gui->addVariable("Armed", is_armed);
+    gui->addVariable("BARO mode", is_baromode);
+
     gui->addGroup("attitude info");
     gui->addVariable("angle0", att.angle[0]);
     gui->addVariable("angle1", att.angle[1]);
@@ -98,7 +105,7 @@ static void app_init()
     gui->addVariable("accADC 1", imu.accADC[1]);
     gui->addVariable("accADC 2", imu.accADC[2]);
 
-    nanogui::ref<Window> rwindow3 = gui->addWindow(Eigen::Vector2i(10, 385), "Arming");
+    nanogui::ref<Window> rwindow3 = gui->addWindow(Eigen::Vector2i(10, 475), "Arming");
     gui->addGroup("Arming");
     gui->addButton("Arm", []()
             {
@@ -254,6 +261,9 @@ int main(int argc, char* argv[])
             msp_get_att(&att);
             msp_get_alt(&alt);
             msp_get_imu(&imu);
+            msp_get_status(&msp_status);
+            is_armed = (msp_status.flag >> BOXARM) & 0x01;
+            is_baromode = (msp_status.flag >> BOXBARO) & 0x01;
             msp_get_debug(debug);
             for(uint8_t i = 0; i < MAX_PLOT_SIZE-1; i++)
             {

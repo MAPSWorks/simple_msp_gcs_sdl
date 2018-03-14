@@ -4,11 +4,13 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "../serial_setup/serial_setup.h"
+#include "../rpi-udp-stream-client/common_util/common_util.h"
 
-static att_t att;
-static alt_t alt;
-static imu_t imu;
-static int16_t debug[4];
+static att_t att = {0, };
+static alt_t alt = {0, };
+static imu_t imu = {0, };
+static msp_status_t msp_status = {0, };
+static int16_t debug[4] = {0, };
 
 static uint8_t msp_arm_request = 0;
 static uint8_t msp_disarm_request = 0;
@@ -126,7 +128,7 @@ static void* send_msp_thread(void* arg)
 {
     static uint8_t cmd_state = 0;
 
-    while(1)
+    while(!is_quit())
     {
         switch(cmd_state)
         {
@@ -157,6 +159,7 @@ static void* send_msp_thread(void* arg)
             case 4:
                 msp_write_cmd(MSP_DEBUG);
                 cmd_state++;
+                break;
             case 5:
                 if(msp_acc_calib_request)
                 {
@@ -174,13 +177,18 @@ static void* send_msp_thread(void* arg)
                     msp_eeprom_write_request = 0;
                 }
                 cmd_state++;
+                break;
+            case 6:
+                msp_write_cmd(MSP_STATUS);
+                cmd_state++;
             default :
                 cmd_state = 0;
                 break;
         }
 
-        usleep(10000);
+        usleep(8000);
     }
+    pthread_exit((void*)0);
 }
 
 static void* received_msp_thread(void* arg)
@@ -189,12 +197,15 @@ static void* received_msp_thread(void* arg)
     uint8_t received_size;
     uint8_t received_buf[MAXBUF_SIZE];
 
-    while(1)
+    while(!is_quit())
     {
         if(msp_parse_cmd(&received_cmd, &received_size, received_buf))
         {
             switch(received_cmd)
             {
+                case MSP_STATUS:
+                    memcpy((uint8_t*)&msp_status, received_buf, received_size);
+                    break;
                 case MSP_ATTITUDE:
                     memcpy((uint8_t*)&att, received_buf, received_size);
                     break;
@@ -206,12 +217,14 @@ static void* received_msp_thread(void* arg)
                     break;
                 case MSP_DEBUG:
                     memcpy((uint8_t*)debug, received_buf, received_size);
+                    break;
                 default :
                     break;
             }
         }
         usleep(100);
     }
+    pthread_exit((void*)0);
 }
 
 void msp_init()
@@ -270,6 +283,11 @@ void msp_get_alt(alt_t* alt_info)
 void msp_get_imu(imu_t* imu_info)
 {
     memcpy(imu_info, &imu, sizeof(imu_t));
+}
+
+void msp_get_status(msp_status_t* msp_status_info)
+{
+    memcpy(msp_status_info, &msp_status, sizeof(msp_status));
 }
 
 void msp_get_debug(int16_t* debug_info)

@@ -73,6 +73,25 @@
 #define MSP_DEBUGMSG             253   //out message         debug string buffer
 #define MSP_DEBUG                254   //out message         debug1,debug2,debug3,debug4
 
+#pragma pack(push, 1)
+//enum for viewing BOX indexed items from MSP_STATUS command
+enum box {
+  BOXARM,
+  BOXANGLE,
+  BOXHORIZON,
+  BOXBARO,
+  BOXMAG,
+  CHECKBOXITEMS
+};
+
+typedef struct {
+  uint16_t cycletime;
+  uint16_t i2c_errors_count;
+  uint16_t sensor;
+  uint32_t flag;
+  uint8_t set;
+} msp_status_t;
+
 typedef struct {
   int32_t  EstAlt;             // in cm
   int16_t  vario;              // variometer in cm/s
@@ -91,6 +110,8 @@ typedef struct {
   int16_t  accADC[3];
 } imu_t;
 
+#pragma pack(pop)
+
 void msp_init();
 void msp_arm();
 void msp_disarm();
@@ -100,6 +121,7 @@ void msp_eeprom_write();
 void msp_get_att(att_t* att_info);
 void msp_get_alt(alt_t* alt_info);
 void msp_get_imu(imu_t* imu_info);
+void msp_get_status(msp_status_t* msp_status_info);
 void msp_get_debug(int16_t* debug_info);
 
 #endif
