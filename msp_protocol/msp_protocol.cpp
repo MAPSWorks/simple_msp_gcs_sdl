@@ -12,6 +12,12 @@ static imu_t imu = {0, };
 static msp_status_t msp_status = {0, };
 static int16_t debug[4] = {0, };
 
+static int16_t roll_input = 0;
+static int16_t pitch_input = 0;
+static int16_t yaw_input = 0;
+static int16_t throttle_input = 0;
+static int16_t althold_switch_input = 0;
+
 static uint8_t msp_arm_request = 0;
 static uint8_t msp_disarm_request = 0;
 static uint8_t msp_acc_calib_request = 0;
@@ -30,6 +36,22 @@ enum
     MAXBUF_SIZE = 64,
 };
 
+enum
+{
+    RC_MAX = 1900,
+    RC_MIN = 1100,
+    RC_MID = 1500,
+
+    rcRoll = 0,
+    rcPitch,
+    rcYaw,
+    rcThrottle,
+    rcAux1,
+    rcAux2,
+    rcAux3,
+    rcAux4,
+};
+
 static void msp_write_cmd(uint8_t cmd)
 {
     serial_write('$');
@@ -38,6 +60,24 @@ static void msp_write_cmd(uint8_t cmd)
     serial_write(0);
     serial_write(cmd);
     serial_write(cmd);
+}
+
+static void msp_write_buf(uint8_t cmd, uint8_t* buf, uint8_t size)
+{
+    uint8_t checksum = 0;
+    checksum = cmd^size;
+
+    serial_write('$');
+    serial_write('M');
+    serial_write('<');
+    serial_write(size);
+    serial_write(cmd);
+    for(uint8_t i = 0; i < size; i++)
+    {
+        serial_write(buf[i]);
+        checksum ^= buf[i];
+    }
+    serial_write(checksum);
 }
 
 static int msp_parse_cmd(uint8_t* received_cmd, uint8_t* received_size, uint8_t* received_buf)
@@ -124,6 +164,28 @@ static int msp_parse_cmd(uint8_t* received_cmd, uint8_t* received_size, uint8_t*
     return retval;
 }
 
+static void msp_send_rc()
+{
+    uint16_t rc16[8];
+    uint8_t rc8[16];
+    rc16[rcRoll] = RC_MID + roll_input;
+    rc16[rcPitch] = RC_MID + pitch_input;
+    rc16[rcYaw] = RC_MID + yaw_input;
+    rc16[rcThrottle] = RC_MIN + throttle_input;
+    rc16[rcAux1] = RC_MIN + althold_switch_input;
+    rc16[rcAux2] = RC_MIN;
+    rc16[rcAux3] = RC_MIN;
+    rc16[rcAux4] = RC_MIN;
+
+    for (uint8_t i = 0; i < 8; i++)
+    {
+        rc8[2 * i] = rc16[i] & 0xff;
+        rc8[2 * i + 1] = (rc16[i] >> 8) & 0xff;
+    }
+
+    msp_write_buf(MSP_SET_RAW_RC, rc8, 16);
+}
+
 static void* send_msp_thread(void* arg)
 {
     static uint8_t cmd_state = 0;
@@ -133,6 +195,10 @@ static void* send_msp_thread(void* arg)
         switch(cmd_state)
         {
             case 0:
+                msp_send_rc();
+                cmd_state++;
+                break;
+            case 1:
                 if(msp_arm_request)
                 {
                     msp_write_cmd(MSP_ARM);
@@ -144,23 +210,24 @@ static void* send_msp_thread(void* arg)
                     msp_disarm_request = 0;
                 }
                 cmd_state++;
-            case 1:
+                break;
+            case 2:
                 msp_write_cmd(MSP_ATTITUDE);
                 cmd_state++;
                 break;
-            case 2:
+            case 3:
                 msp_write_cmd(MSP_ALTITUDE);
                 cmd_state++;
                 break;
-            case 3:
+            case 4:
                 msp_write_cmd(MSP_RAW_IMU);
                 cmd_state++;
                 break;
-            case 4:
+            case 5:
                 msp_write_cmd(MSP_DEBUG);
                 cmd_state++;
                 break;
-            case 5:
+            case 6:
                 if(msp_acc_calib_request)
                 {
                     msp_write_cmd(MSP_ACC_CALIBRATION);
@@ -178,7 +245,7 @@ static void* send_msp_thread(void* arg)
                 }
                 cmd_state++;
                 break;
-            case 6:
+            case 7:
                 msp_write_cmd(MSP_STATUS);
                 cmd_state++;
             default :
@@ -186,7 +253,7 @@ static void* send_msp_thread(void* arg)
                 break;
         }
 
-        usleep(8000);
+        usleep(6000);
     }
     pthread_exit((void*)0);
 }
@@ -293,4 +360,56 @@ void msp_get_status(msp_status_t* msp_status_info)
 void msp_get_debug(int16_t* debug_info)
 {
     memcpy(debug_info, debug, sizeof(debug));
+}
+
+void msp_left()
+{
+    roll_input = -50;
+}
+
+void msp_right()
+{
+    roll_input = 50;
+}
+
+void msp_forward()
+{
+    pitch_input = 50;
+}
+
+void msp_backward()
+{
+    pitch_input = -50;
+}
+
+void msp_turn_left()
+{
+    yaw_input = -100;
+}
+
+void msp_turn_right()
+{
+    yaw_input = 100;
+}
+
+void msp_attitude_input_default()
+{
+    roll_input = 0;
+    pitch_input = 0;
+    yaw_input = 0;
+}
+
+void msp_throttle(int16_t throttle)
+{
+    throttle_input = throttle;
+}
+
+void msp_set_alt_mod()
+{
+    althold_switch_input = 800;
+}
+
+void msp_reset_alt_mod()
+{
+    althold_switch_input = 0;
 }

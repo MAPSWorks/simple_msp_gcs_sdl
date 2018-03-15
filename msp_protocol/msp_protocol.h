@@ -124,4 +124,15 @@ void msp_get_imu(imu_t* imu_info);
 void msp_get_status(msp_status_t* msp_status_info);
 void msp_get_debug(int16_t* debug_info);
 
+void msp_left();
+void msp_right();
+void msp_forward();
+void msp_backward();
+void msp_turn_left();
+void msp_turn_right();
+void msp_attitude_input_default();
+void msp_throttle(int16_t throttle);
+void msp_set_alt_mod();
+void msp_reset_alt_mod();
+
 #endif

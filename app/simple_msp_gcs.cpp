@@ -30,6 +30,8 @@ static uint8_t is_armed = 0;
 static uint8_t is_baromode = 0;
 static int16_t debug[4] = {9999, };
 
+static int16_t throttle_val = 0;
+
 static Eigen::VectorXf* altitude_func_ptr;
 static Eigen::VectorXf* attitude_roll_ptr;
 static Eigen::VectorXf* attitude_pitch_ptr;
@@ -110,11 +112,17 @@ static void app_init()
     gui->addButton("Arm", []()
             {
                 DEBUG_MSG("Arm\n");
+                msp_attitude_input_default();
+                throttle_val = 0;
+                msp_throttle(throttle_val);
                 msp_arm();
             });
     gui->addButton("Disarm", []()
             {
                 DEBUG_MSG("Disarm\n");
+                msp_attitude_input_default();
+                throttle_val = 0;
+                msp_throttle(throttle_val);
                 msp_disarm();
             });
     gui->addGroup("Calibration");
@@ -199,7 +207,7 @@ int main(int argc, char* argv[])
 
     SDL_Event event;
 
-    auto pre_t = chrono::high_resolution_clock::now();
+    auto pre_display_t = chrono::high_resolution_clock::now();
 
     while(!is_quit())
     {
@@ -214,37 +222,77 @@ int main(int argc, char* argv[])
                 set_quit();
                 break;
         }
+        
+        static uint16_t wheel_count = 0;
+        if(event.type == SDL_MOUSEWHEEL)
+        {
+            wheel_count++;
+            if(wheel_count > 10000)
+            {
+                DEBUG_MSG("wheel direction : %d\n", event.wheel.y);
+                if(event.wheel.y == 1) // scroll up
+                {
+                    DEBUG_MSG("mouse wheel up\n");
+                    throttle_val += 1;        
+                }
+                else if(event.wheel.y == -1) // scroll down
+                {
+                    DEBUG_MSG("mouse wheel down\n");
+                    throttle_val -= 1;
+                }
+                if(throttle_val > 800)
+                    throttle_val = 800;
+                if(throttle_val < 0)
+                    throttle_val = 0;
+                msp_throttle(throttle_val);
+                
+                wheel_count = 0;
+            }
+        }
 
-        if(key_state[SDL_SCANCODE_LEFT])
+        if(!(key_state[SDL_SCANCODE_A]
+             ||key_state[SDL_SCANCODE_D]
+             ||key_state[SDL_SCANCODE_W]
+             ||key_state[SDL_SCANCODE_S]))
         {
-            DEBUG_MSG("left");
+            msp_attitude_input_default();
         }
-        if(key_state[SDL_SCANCODE_RIGHT])
+        else
         {
-            DEBUG_MSG("right");
+            if(key_state[SDL_SCANCODE_A])
+            {
+                DEBUG_MSG("left\n");
+                msp_left();
+            }
+            if(key_state[SDL_SCANCODE_D])
+            {
+                DEBUG_MSG("right\n");
+                msp_right();
+            }
+            if(key_state[SDL_SCANCODE_W])
+            {
+                DEBUG_MSG("up\n");
+                msp_forward();
+            }
+            if(key_state[SDL_SCANCODE_S])
+            {
+                DEBUG_MSG("donw\n");
+                msp_backward();
+            }
         }
-        if(key_state[SDL_SCANCODE_UP])
-        {
-            DEBUG_MSG("up");
-        }
-        if(key_state[SDL_SCANCODE_DOWN])
-        {
-            DEBUG_MSG("donw");
-        }
-
         for(uint16_t i = 0; i < SDL_NUM_SCANCODES; i++)
         {
             if((pre_key_state[i] != key_state[i]) && key_state[i])
             {
                 switch(i)
                 {
-                    case SDL_SCANCODE_A:
-                        DEBUG_MSG("Arming");
-                        msp_arm();
+                    case SDL_SCANCODE_Q:
+                        DEBUG_MSG("Go to ALT HOLD mode\n");
+                        msp_set_alt_mod();
                         break;
-                    case SDL_SCANCODE_D:
-                        DEBUG_MSG("Disarming");
-                        msp_disarm();
+                    case SDL_SCANCODE_E:
+                        DEBUG_MSG("END ALT HOLD Mode\n");
+                        msp_reset_alt_mod();
                         break;
                 }
             }
@@ -252,11 +300,11 @@ int main(int argc, char* argv[])
             pre_key_state[i] = key_state[i];
         }
 
-        auto current_t = chrono::high_resolution_clock::now();
+        auto current_display_t = chrono::high_resolution_clock::now();
 
-        auto elapsed = chrono::duration_cast<chrono::milliseconds>(current_t - pre_t);
+        auto display_elapsed = chrono::duration_cast<chrono::milliseconds>(current_display_t - pre_display_t);
 
-        if(elapsed.count() > 16)
+        if(display_elapsed.count() > 16)
         {
             msp_get_att(&att);
             msp_get_alt(&alt);
@@ -281,7 +329,7 @@ int main(int argc, char* argv[])
 
             gui_draw(event);
 
-            pre_t = chrono::high_resolution_clock::now();
+            pre_display_t = chrono::high_resolution_clock::now();
         }
     }
 
