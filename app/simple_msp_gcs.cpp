@@ -206,54 +206,53 @@ int main(int argc, char* argv[])
     Eigen::VectorXf& attitude_yaw = *attitude_yaw_ptr;
 
     SDL_Event event;
+    uint8_t sdl_event_state = 0;
 
     auto pre_display_t = chrono::high_resolution_clock::now();
 
     while(!is_quit())
     {
-        SDL_PollEvent(&event);
+        // Get poll event and state
+        sdl_event_state = SDL_PollEvent(&event);
 
         const uint8_t *key_state = SDL_GetKeyboardState(NULL);
         static uint8_t pre_key_state[SDL_NUM_SCANCODES] = {SDL_SCANCODE_UNKNOWN,};
 
-        switch(event.type)
+        // Event driven loop
+        if(sdl_event_state)
         {
-            case SDL_QUIT:
-                set_quit();
-                break;
-        }
-        
-        static uint16_t wheel_count = 0;
-        if(event.type == SDL_MOUSEWHEEL)
-        {
-            wheel_count++;
-            if(wheel_count > 10000)
+            switch(event.type)
             {
-                DEBUG_MSG("wheel direction : %d\n", event.wheel.y);
+                case SDL_QUIT:
+                    set_quit();
+                    break;
+            }
+            if(event.type == SDL_MOUSEWHEEL)
+            {
                 if(event.wheel.y == 1) // scroll up
                 {
                     DEBUG_MSG("mouse wheel up\n");
-                    throttle_val += 1;        
+                    throttle_val += 10;
                 }
                 else if(event.wheel.y == -1) // scroll down
                 {
                     DEBUG_MSG("mouse wheel down\n");
-                    throttle_val -= 1;
+                    throttle_val -= 10;
                 }
                 if(throttle_val > 800)
                     throttle_val = 800;
                 if(throttle_val < 0)
                     throttle_val = 0;
                 msp_throttle(throttle_val);
-                
-                wheel_count = 0;
+                DEBUG_MSG("Throttle value : %d\n", throttle_val);
             }
         }
-
+        
+        // Direct Key input handle
         if(!(key_state[SDL_SCANCODE_A]
-             ||key_state[SDL_SCANCODE_D]
-             ||key_state[SDL_SCANCODE_W]
-             ||key_state[SDL_SCANCODE_S]))
+                    ||key_state[SDL_SCANCODE_D]
+                    ||key_state[SDL_SCANCODE_W]
+                    ||key_state[SDL_SCANCODE_S]))
         {
             msp_attitude_input_default();
         }
@@ -299,9 +298,9 @@ int main(int argc, char* argv[])
 
             pre_key_state[i] = key_state[i];
         }
-
+       
+        // NanoGUI display
         auto current_display_t = chrono::high_resolution_clock::now();
-
         auto display_elapsed = chrono::duration_cast<chrono::milliseconds>(current_display_t - pre_display_t);
 
         if(display_elapsed.count() > 16)
@@ -329,7 +328,7 @@ int main(int argc, char* argv[])
 
             gui_draw(event);
 
-            pre_display_t = chrono::high_resolution_clock::now();
+            pre_display_t = chrono::high_resolution_clock::now();        
         }
     }
 
