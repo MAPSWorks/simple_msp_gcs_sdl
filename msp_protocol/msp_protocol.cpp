@@ -11,6 +11,7 @@ static alt_t alt = {0, };
 static imu_t imu = {0, };
 static msp_status_t msp_status = {0, };
 static int16_t debug[4] = {0, };
+static uint16_t msp_rc[8];
 
 static int16_t roll_input = 0;
 static int16_t pitch_input = 0;
@@ -248,12 +249,16 @@ static void* send_msp_thread(void* arg)
             case 7:
                 msp_write_cmd(MSP_STATUS);
                 cmd_state++;
+                break;
+            case 8:
+                msp_write_cmd(MSP_RC);
+                cmd_state++;
             default :
                 cmd_state = 0;
                 break;
         }
 
-        usleep(6000);
+        usleep(4000);
     }
     pthread_exit((void*)0);
 }
@@ -284,6 +289,9 @@ static void* received_msp_thread(void* arg)
                     break;
                 case MSP_DEBUG:
                     memcpy((uint8_t*)debug, received_buf, received_size);
+                    break;
+                case MSP_RC:
+                    memcpy((uint8_t*)msp_rc, received_buf, received_size);
                     break;
                 default :
                     break;
@@ -412,4 +420,9 @@ void msp_set_alt_mod()
 void msp_reset_alt_mod()
 {
     althold_switch_input = 0;
+}
+
+void msp_get_rc(uint16_t* msp_rc_info)
+{
+    memcpy(msp_rc_info, msp_rc, sizeof(msp_rc));
 }

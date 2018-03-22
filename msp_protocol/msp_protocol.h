@@ -123,6 +123,7 @@ void msp_get_alt(alt_t* alt_info);
 void msp_get_imu(imu_t* imu_info);
 void msp_get_status(msp_status_t* msp_status_info);
 void msp_get_debug(int16_t* debug_info);
+void msp_get_rc(uint16_t* msp_rc_info);
 
 void msp_left();
 void msp_right();

@@ -29,6 +29,7 @@ static msp_status_t msp_status = {0, };
 static uint8_t is_armed = 0;
 static uint8_t is_baromode = 0;
 static int16_t debug[4] = {9999, };
+static uint16_t msp_rc[8] = {9999, };
 
 static int16_t throttle_val = 0;
 
@@ -181,6 +182,17 @@ static void app_init()
                 video_stop();
             });
 
+    nanogui::ref<Window> rwindow6 = gui->addWindow(Eigen::Vector2i(410, 400), "RC status");
+    gui->addGroup("RC state of drone");
+    gui->addVariable("Roll"     , msp_rc[0]);
+    gui->addVariable("Pitch"    , msp_rc[1]);
+    gui->addVariable("Yaw"      , msp_rc[2]);
+    gui->addVariable("Throttle" , msp_rc[3]);
+    gui->addVariable("AUX1"     , msp_rc[4]);
+    gui->addVariable("AUX2"     , msp_rc[5]);
+    gui->addVariable("AUX3"     , msp_rc[6]);
+    gui->addVariable("AUX4"     , msp_rc[7]);
+
     gui_set_done();
 }
 
@@ -312,6 +324,7 @@ int main(int argc, char* argv[])
             is_armed = (msp_status.flag >> BOXARM) & 0x01;
             is_baromode = (msp_status.flag >> BOXBARO) & 0x01;
             msp_get_debug(debug);
+            msp_get_rc(msp_rc);
             for(uint8_t i = 0; i < MAX_PLOT_SIZE-1; i++)
             {
                 altitude_func[i]    = altitude_func[i+1];
