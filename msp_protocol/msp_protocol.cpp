@@ -6,12 +6,7 @@
 #include "../serial_setup/serial_setup.h"
 #include "../rpi-udp-stream-client/common_util/common_util.h"
 
-static att_t att = {0, };
-static alt_t alt = {0, };
-static imu_t imu = {0, };
-static msp_status_t msp_status = {0, };
-static int16_t debug[4] = {0, };
-static uint16_t msp_rc[8];
+static drone_info_t drone_info_tmp = {0, };
 
 static int16_t roll_input = 0;
 static int16_t pitch_input = 0;
@@ -196,10 +191,6 @@ static void* send_msp_thread(void* arg)
         switch(cmd_state)
         {
             case 0:
-                msp_send_rc();
-                cmd_state++;
-                break;
-            case 1:
                 if(msp_arm_request)
                 {
                     msp_write_cmd(MSP_ARM);
@@ -210,25 +201,6 @@ static void* send_msp_thread(void* arg)
                     msp_write_cmd(MSP_DISARM);
                     msp_disarm_request = 0;
                 }
-                cmd_state++;
-                break;
-            case 2:
-                msp_write_cmd(MSP_ATTITUDE);
-                cmd_state++;
-                break;
-            case 3:
-                msp_write_cmd(MSP_ALTITUDE);
-                cmd_state++;
-                break;
-            case 4:
-                msp_write_cmd(MSP_RAW_IMU);
-                cmd_state++;
-                break;
-            case 5:
-                msp_write_cmd(MSP_DEBUG);
-                cmd_state++;
-                break;
-            case 6:
                 if(msp_acc_calib_request)
                 {
                     msp_write_cmd(MSP_ACC_CALIBRATION);
@@ -246,19 +218,19 @@ static void* send_msp_thread(void* arg)
                 }
                 cmd_state++;
                 break;
-            case 7:
-                msp_write_cmd(MSP_STATUS);
+            case 1:
+                msp_send_rc();
                 cmd_state++;
                 break;
-            case 8:
-                msp_write_cmd(MSP_RC);
+            case 2:
+                msp_write_cmd(MSP_SENSORS);
                 cmd_state++;
-            default :
+            default:
                 cmd_state = 0;
                 break;
         }
 
-        usleep(4000);
+        usleep(6666);
     }
     pthread_exit((void*)0);
 }
@@ -275,29 +247,13 @@ static void* received_msp_thread(void* arg)
         {
             switch(received_cmd)
             {
-                case MSP_STATUS:
-                    memcpy((uint8_t*)&msp_status, received_buf, received_size);
-                    break;
-                case MSP_ATTITUDE:
-                    memcpy((uint8_t*)&att, received_buf, received_size);
-                    break;
-                case MSP_ALTITUDE:
-                    memcpy((uint8_t*)&alt, received_buf, received_size);
-                    break;
-                case MSP_RAW_IMU:
-                    memcpy((uint8_t*)&imu, received_buf, received_size);
-                    break;
-                case MSP_DEBUG:
-                    memcpy((uint8_t*)debug, received_buf, received_size);
-                    break;
-                case MSP_RC:
-                    memcpy((uint8_t*)msp_rc, received_buf, received_size);
-                    break;
+                case MSP_SENSORS:
+                    memcpy((uint8_t*)&drone_info_tmp, received_buf, received_size);
                 default :
                     break;
             }
         }
-        usleep(100);
+        usleep(50);
     }
     pthread_exit((void*)0);
 }
@@ -343,31 +299,6 @@ void msp_mag_calib()
 void msp_eeprom_write()
 {
     msp_eeprom_write_request = 1;
-}
-
-void msp_get_att(att_t* att_info)
-{
-    memcpy(att_info, &att, sizeof(att_t));
-}
-
-void msp_get_alt(alt_t* alt_info)
-{
-    memcpy(alt_info, &alt, sizeof(alt_t));
-}
-
-void msp_get_imu(imu_t* imu_info)
-{
-    memcpy(imu_info, &imu, sizeof(imu_t));
-}
-
-void msp_get_status(msp_status_t* msp_status_info)
-{
-    memcpy(msp_status_info, &msp_status, sizeof(msp_status));
-}
-
-void msp_get_debug(int16_t* debug_info)
-{
-    memcpy(debug_info, debug, sizeof(debug));
 }
 
 void msp_left()
@@ -422,7 +353,7 @@ void msp_reset_alt_mod()
     althold_switch_input = 0;
 }
 
-void msp_get_rc(uint16_t* msp_rc_info)
+void msp_get_info(drone_info_t* drone_info)
 {
-    memcpy(msp_rc_info, msp_rc, sizeof(msp_rc));
+    memcpy(drone_info, &drone_info_tmp, sizeof(drone_info_tmp));
 }

@@ -46,6 +46,7 @@
 #define MSP_TRIM_DOWN            154
 #define MSP_TRIM_LEFT            155
 #define MSP_TRIM_RIGHT           156
+#define MSP_SENSORS              157
 //--------------add for Serial remote control end------------//
 
 #define MSP_SET_RAW_RC           200   //in message          8 rc chan
@@ -74,41 +75,18 @@
 #define MSP_DEBUG                254   //out message         debug1,debug2,debug3,debug4
 
 #pragma pack(push, 1)
-//enum for viewing BOX indexed items from MSP_STATUS command
-enum box {
-  BOXARM,
-  BOXANGLE,
-  BOXHORIZON,
-  BOXBARO,
-  BOXMAG,
-  CHECKBOXITEMS
-};
 
 typedef struct {
-  uint16_t cycletime;
-  uint16_t i2c_errors_count;
-  uint16_t sensor;
-  uint32_t flag;
-  uint8_t set;
-} msp_status_t;
-
-typedef struct {
-  int32_t  EstAlt;             // in cm
-  int16_t  vario;              // variometer in cm/s
-} alt_t;
-
-typedef struct {
-  int16_t angle[2];            // absolute angle inclination in multiple of 0.1 degree    180 deg = 1800
-  int16_t heading;             // variometer in cm/s
-} att_t;
-
-typedef struct {
-  int16_t  accSmooth[3];
-  int16_t  gyroData[3];
-  int16_t  magADC[3];
-  int16_t  gyroADC[3];
-  int16_t  accADC[3];
-} imu_t;
+    uint8_t arm_status;
+    uint8_t baro_mode_status;
+    int16_t angle[2];            // absolute angle inclination in multiple of 0.1 degree    180 deg = 1800
+    int16_t heading;             // variometer in cm/s
+    int32_t height;              // in cm
+    int16_t accSmooth[3];
+    int16_t gyroData[3];
+    int16_t rcData[5];           // interval [1000;2000]
+    int16_t debug[4];
+} drone_info_t;
 
 #pragma pack(pop)
 
@@ -118,12 +96,7 @@ void msp_disarm();
 void msp_acc_calib();
 void msp_mag_calib();
 void msp_eeprom_write();
-void msp_get_att(att_t* att_info);
-void msp_get_alt(alt_t* alt_info);
-void msp_get_imu(imu_t* imu_info);
-void msp_get_status(msp_status_t* msp_status_info);
-void msp_get_debug(int16_t* debug_info);
-void msp_get_rc(uint16_t* msp_rc_info);
+void msp_get_info(drone_info_t* drone_info);
 
 void msp_left();
 void msp_right();

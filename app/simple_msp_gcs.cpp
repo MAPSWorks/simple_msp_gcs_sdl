@@ -22,14 +22,7 @@ static FormHelper* gui;
 #define MAX_PLOT_SIZE 100
 
 //Drone's information
-static att_t att = {9999, };
-static alt_t alt = {9999, };
-static imu_t imu = {9999, };
-static msp_status_t msp_status = {0, };
-static uint8_t is_armed = 0;
-static uint8_t is_baromode = 0;
-static int16_t debug[4] = {9999, };
-static uint16_t msp_rc[8] = {9999, };
+static drone_info_t drone_info = {0, };
 
 static int16_t throttle_val = 0;
 
@@ -68,47 +61,36 @@ static void app_init()
 
     nanogui::ref<Window> rwindow = gui->addWindow(Eigen::Vector2i(10, 10), "Basic information");
     gui->addGroup("Status info");
-    gui->addVariable("Armed", is_armed);
-    gui->addVariable("BARO mode", is_baromode);
+    gui->addVariable("Armed", drone_info.arm_status);
+    gui->addVariable("BARO mode", drone_info.baro_mode_status);
 
     gui->addGroup("attitude info");
-    gui->addVariable("angle0", att.angle[0]);
-    gui->addVariable("angle1", att.angle[1]);
-    gui->addVariable("heading", att.heading);
+    gui->addVariable("angle0", drone_info.angle[0]);
+    gui->addVariable("angle1", drone_info.angle[1]);
+    gui->addVariable("heading", drone_info.heading);
 
     gui->addGroup("altitude info");
-    gui->addVariable("EstAlt", alt.EstAlt);
-    gui->addVariable("vario", alt.vario);
+    gui->addVariable("EstAlt", drone_info.height);
 
+    drone_info.debug[0] = 9999; //just for text box size in gui
     gui->addGroup("Debug Data");
-    gui->addVariable("Debug[0]", debug[0]);
-    gui->addVariable("Debug[1]", debug[1]);
-    gui->addVariable("Debug[2]", debug[2]);
-    gui->addVariable("Debug[3]", debug[3]);
+    gui->addVariable("Debug[0]", drone_info.debug[0]);
+    gui->addVariable("Debug[1]", drone_info.debug[1]);
+    gui->addVariable("Debug[2]", drone_info.debug[2]);
+    gui->addVariable("Debug[3]", drone_info.debug[3]);
 
     nanogui::ref<Window> rwindow2 = gui->addWindow(Eigen::Vector2i(210, 10), "Raw sensor data");
-    gui->addGroup("Raw sensor data");
-    gui->addVariable("accSmooth 0", imu.accSmooth[0]);
-    gui->addVariable("accSmooth 1", imu.accSmooth[1]);
-    gui->addVariable("accSmooth 2", imu.accSmooth[2]);
+    drone_info.accSmooth[0] = 9999;
+    gui->addGroup("Raw sensor data"); //just for text box size in gui
+    gui->addVariable("accSmooth 0", drone_info.accSmooth[0]);
+    gui->addVariable("accSmooth 1", drone_info.accSmooth[1]);
+    gui->addVariable("accSmooth 2", drone_info.accSmooth[2]);
 
-    gui->addVariable("gyroData 0", imu.gyroData[0]);
-    gui->addVariable("gyroData 1", imu.gyroData[1]);
-    gui->addVariable("gyroData 2", imu.gyroData[2]);
+    gui->addVariable("gyroData 0", drone_info.gyroData[0]);
+    gui->addVariable("gyroData 1", drone_info.gyroData[1]);
+    gui->addVariable("gyroData 2", drone_info.gyroData[2]);
 
-    gui->addVariable("magADC 0", imu.magADC[0]);
-    gui->addVariable("magADC 1", imu.magADC[1]);
-    gui->addVariable("magADC 2", imu.magADC[2]);
-
-    gui->addVariable("gyroADC 0", imu.gyroADC[0]);
-    gui->addVariable("gyroADC 1", imu.gyroADC[1]);
-    gui->addVariable("gyroADC 2", imu.gyroADC[2]);
-
-    gui->addVariable("accADC 0", imu.accADC[0]);
-    gui->addVariable("accADC 1", imu.accADC[1]);
-    gui->addVariable("accADC 2", imu.accADC[2]);
-
-    nanogui::ref<Window> rwindow3 = gui->addWindow(Eigen::Vector2i(10, 475), "Arming");
+    nanogui::ref<Window> rwindow3 = gui->addWindow(Eigen::Vector2i(700, 10), "Arming");
     gui->addGroup("Arming");
     gui->addButton("Arm", []()
             {
@@ -169,7 +151,7 @@ static void app_init()
     attitude_yaw.resize(MAX_PLOT_SIZE);
     attitude_yaw_ptr = &attitude_yaw;
 
-    nanogui::ref<Window> rwindow5 = gui->addWindow(Eigen::Vector2i(210, 455), "Video Streamming");
+    nanogui::ref<Window> rwindow5 = gui->addWindow(Eigen::Vector2i(700, 300), "Video Streamming");
     gui->addGroup("Request and Stop");
     gui->addButton("Video Request", []()
             {
@@ -182,16 +164,14 @@ static void app_init()
                 video_stop();
             });
 
-    nanogui::ref<Window> rwindow6 = gui->addWindow(Eigen::Vector2i(410, 400), "RC status");
+    nanogui::ref<Window> rwindow6 = gui->addWindow(Eigen::Vector2i(210, 240), "RC status");
     gui->addGroup("RC state of drone");
-    gui->addVariable("Roll"     , msp_rc[0]);
-    gui->addVariable("Pitch"    , msp_rc[1]);
-    gui->addVariable("Yaw"      , msp_rc[2]);
-    gui->addVariable("Throttle" , msp_rc[3]);
-    gui->addVariable("AUX1"     , msp_rc[4]);
-    gui->addVariable("AUX2"     , msp_rc[5]);
-    gui->addVariable("AUX3"     , msp_rc[6]);
-    gui->addVariable("AUX4"     , msp_rc[7]);
+    drone_info.rcData[0] = 9999; // just for text box size 
+    gui->addVariable("Roll"     , drone_info.rcData[0]);
+    gui->addVariable("Pitch"    , drone_info.rcData[1]);
+    gui->addVariable("Yaw"      , drone_info.rcData[2]);
+    gui->addVariable("Throttle" , drone_info.rcData[3]);
+    gui->addVariable("AUX1"     , drone_info.rcData[4]);
 
     gui_set_done();
 }
@@ -317,14 +297,7 @@ int main(int argc, char* argv[])
 
         if(display_elapsed.count() > 16)
         {
-            msp_get_att(&att);
-            msp_get_alt(&alt);
-            msp_get_imu(&imu);
-            msp_get_status(&msp_status);
-            is_armed = (msp_status.flag >> BOXARM) & 0x01;
-            is_baromode = (msp_status.flag >> BOXBARO) & 0x01;
-            msp_get_debug(debug);
-            msp_get_rc(msp_rc);
+            msp_get_info(&drone_info);
             for(uint8_t i = 0; i < MAX_PLOT_SIZE-1; i++)
             {
                 altitude_func[i]    = altitude_func[i+1];
@@ -332,10 +305,10 @@ int main(int argc, char* argv[])
                 attitude_pitch[i]   = attitude_pitch[i+1];
                 attitude_yaw[i]     = attitude_yaw[i+1];
             }
-            altitude_func[MAX_PLOT_SIZE-1] = alt.EstAlt/500.0;
-            attitude_roll[MAX_PLOT_SIZE-1] = att.angle[0]/2000.0+0.5;
-            attitude_pitch[MAX_PLOT_SIZE-1] = att.angle[1]/2000.0+0.5;
-            attitude_yaw[MAX_PLOT_SIZE-1] = att.heading/360.0+0.5;
+            altitude_func[MAX_PLOT_SIZE-1] = drone_info.height/500.0;
+            attitude_roll[MAX_PLOT_SIZE-1] = drone_info.angle[0]/2000.0+0.5;
+            attitude_pitch[MAX_PLOT_SIZE-1] = drone_info.angle[1]/2000.0+0.5;
+            attitude_yaw[MAX_PLOT_SIZE-1] = drone_info.heading/360.0+0.5;
 
             gui->refresh();
 
