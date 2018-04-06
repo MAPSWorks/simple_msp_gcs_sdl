@@ -38,8 +38,8 @@
 #include <nanovg/stb_image.h>
 
 
-#define WINDOW_WIDTH 1024
-#define WINDOW_HEIGHT 768
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 700
 
 void gui_init();
 void gui_set_done();
