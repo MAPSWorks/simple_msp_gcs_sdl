@@ -224,15 +224,15 @@ int main(int argc, char* argv[])
                 if(event.wheel.y == 1) // scroll up
                 {
                     DEBUG_MSG("mouse wheel up\n");
-                    throttle_val += 10;
+                    throttle_val += 3;
                 }
                 else if(event.wheel.y == -1) // scroll down
                 {
                     DEBUG_MSG("mouse wheel down\n");
-                    throttle_val -= 10;
+                    throttle_val -= 3;
                 }
-                if(throttle_val > 800)
-                    throttle_val = 800;
+                if(throttle_val > 250)
+                    throttle_val = 250;
                 if(throttle_val < 0)
                     throttle_val = 0;
                 msp_throttle(throttle_val);

@@ -11,7 +11,7 @@ static drone_info_t drone_info_tmp = {0, };
 static int16_t roll_input = 0;
 static int16_t pitch_input = 0;
 static int16_t yaw_input = 0;
-static int16_t throttle_input = 0;
+static uint8_t throttle_input = 0;
 static int16_t althold_switch_input = 0;
 
 static uint8_t msp_arm_request = 0;
@@ -34,18 +34,15 @@ enum
 
 enum
 {
-    RC_MAX = 1900,
-    RC_MIN = 1100,
-    RC_MID = 1500,
+    RC_MAX = 250,
+    RC_MIN = 0,
+    RC_MID = 125,
 
     rcRoll = 0,
     rcPitch,
     rcYaw,
     rcThrottle,
     rcAux1,
-    rcAux2,
-    rcAux3,
-    rcAux4,
 };
 
 static void msp_write_cmd(uint8_t cmd)
@@ -162,24 +159,14 @@ static int msp_parse_cmd(uint8_t* received_cmd, uint8_t* received_size, uint8_t*
 
 static void msp_send_rc()
 {
-    uint16_t rc16[8];
-    uint8_t rc8[16];
-    rc16[rcRoll] = RC_MID + roll_input;
-    rc16[rcPitch] = RC_MID + pitch_input;
-    rc16[rcYaw] = RC_MID + yaw_input;
-    rc16[rcThrottle] = RC_MIN + throttle_input;
-    rc16[rcAux1] = RC_MIN + althold_switch_input;
-    rc16[rcAux2] = RC_MIN;
-    rc16[rcAux3] = RC_MIN;
-    rc16[rcAux4] = RC_MIN;
+    uint8_t rc[5];
+    rc[rcRoll]      = RC_MID + roll_input;
+    rc[rcPitch]     = RC_MID + pitch_input;
+    rc[rcYaw]       = RC_MID + yaw_input;
+    rc[rcThrottle]  = RC_MIN + throttle_input;
+    rc[rcAux1]      = RC_MIN + althold_switch_input;
 
-    for (uint8_t i = 0; i < 8; i++)
-    {
-        rc8[2 * i] = rc16[i] & 0xff;
-        rc8[2 * i + 1] = (rc16[i] >> 8) & 0xff;
-    }
-
-    msp_write_buf(MSP_SET_RAW_RC, rc8, 16);
+    msp_write_buf(MSP_SET_TINY_RC, rc, 5);
 }
 
 static void* send_msp_thread(void* arg)
@@ -303,32 +290,32 @@ void msp_eeprom_write()
 
 void msp_left()
 {
-    roll_input = -50;
+    roll_input = -12;
 }
 
 void msp_right()
 {
-    roll_input = 50;
+    roll_input = 12;
 }
 
 void msp_forward()
 {
-    pitch_input = 50;
+    pitch_input = 12;
 }
 
 void msp_backward()
 {
-    pitch_input = -50;
+    pitch_input = -12;
 }
 
 void msp_turn_left()
 {
-    yaw_input = -100;
+    yaw_input = -25;
 }
 
 void msp_turn_right()
 {
-    yaw_input = 100;
+    yaw_input = 25;
 }
 
 void msp_attitude_input_default()
@@ -338,14 +325,14 @@ void msp_attitude_input_default()
     yaw_input = 0;
 }
 
-void msp_throttle(int16_t throttle)
+void msp_throttle(uint8_t throttle)
 {
     throttle_input = throttle;
 }
 
 void msp_set_alt_mod()
 {
-    althold_switch_input = 800;
+    althold_switch_input = 200;
 }
 
 void msp_reset_alt_mod()

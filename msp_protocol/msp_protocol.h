@@ -47,6 +47,7 @@
 #define MSP_TRIM_LEFT            155
 #define MSP_TRIM_RIGHT           156
 #define MSP_SENSORS              157
+#define MSP_SET_TINY_RC          158
 //--------------add for Serial remote control end------------//
 
 #define MSP_SET_RAW_RC           200   //in message          8 rc chan
@@ -105,7 +106,7 @@ void msp_backward();
 void msp_turn_left();
 void msp_turn_right();
 void msp_attitude_input_default();
-void msp_throttle(int16_t throttle);
+void msp_throttle(uint8_t throttle);
 void msp_set_alt_mod();
 void msp_reset_alt_mod();
 
