@@ -119,6 +119,27 @@ static void app_init()
                 DEBUG_MSG("Mag calibration\n");
                 msp_mag_calib();
             });
+    gui->addGroup("Trim");
+    gui->addButton("Trim Up", []()
+            {
+                DEBUG_MSG("Trim Up\n");
+                msp_set_trim_up();
+            });
+    gui->addButton("Trim Down", []()
+            {
+                DEBUG_MSG("Trim Down\n");
+                msp_set_trim_down();
+            });
+    gui->addButton("Trim Left", []()
+            {
+                DEBUG_MSG("Trim Left\n");
+                msp_set_trim_left();
+            });
+    gui->addButton("Trim Right", []()
+            {
+                DEBUG_MSG("Trim Right\n");
+                msp_set_trim_right();
+            });
     gui->addGroup("Save setting");
     gui->addButton("EEPROM write", []()
             {
@@ -151,7 +172,7 @@ static void app_init()
     attitude_yaw.resize(MAX_PLOT_SIZE);
     attitude_yaw_ptr = &attitude_yaw;
 
-    nanogui::ref<Window> rwindow5 = gui->addWindow(Eigen::Vector2i(700, 300), "Video Streamming");
+    nanogui::ref<Window> rwindow5 = gui->addWindow(Eigen::Vector2i(520, 323), "Video Streamming");
     gui->addGroup("Request and Stop");
     gui->addButton("Video Request", []()
             {
@@ -244,7 +265,9 @@ int main(int argc, char* argv[])
         if(!(key_state[SDL_SCANCODE_A]
                     ||key_state[SDL_SCANCODE_D]
                     ||key_state[SDL_SCANCODE_W]
-                    ||key_state[SDL_SCANCODE_S]))
+                    ||key_state[SDL_SCANCODE_S]
+                    ||key_state[SDL_SCANCODE_Z]
+                    ||key_state[SDL_SCANCODE_C]))
         {
             msp_attitude_input_default();
         }
@@ -267,8 +290,18 @@ int main(int argc, char* argv[])
             }
             if(key_state[SDL_SCANCODE_S])
             {
-                DEBUG_MSG("donw\n");
+                DEBUG_MSG("down\n");
                 msp_backward();
+            }
+            if(key_state[SDL_SCANCODE_Z])
+            {
+                DEBUG_MSG("turn left\n");
+                msp_turn_left();
+            }
+            if(key_state[SDL_SCANCODE_C])
+            {
+                DEBUG_MSG("turn right\n");
+                msp_turn_right();
             }
         }
         for(uint16_t i = 0; i < SDL_NUM_SCANCODES; i++)

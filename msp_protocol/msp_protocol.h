@@ -107,7 +107,13 @@ void msp_turn_left();
 void msp_turn_right();
 void msp_attitude_input_default();
 void msp_throttle(uint8_t throttle);
+
 void msp_set_alt_mod();
 void msp_reset_alt_mod();
+
+void msp_set_trim_up();
+void msp_set_trim_down();
+void msp_set_trim_left();
+void msp_set_trim_right();
 
 #endif

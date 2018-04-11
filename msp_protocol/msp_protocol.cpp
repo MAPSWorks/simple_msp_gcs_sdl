@@ -22,6 +22,17 @@ static uint8_t msp_eeprom_write_request = 0;
 
 enum
 {
+    TRIM_UP = 0,
+    TRIM_DOWN,
+    TRIM_LEFT,
+    TRIM_RIGHT,
+};
+
+static uint8_t msp_trim_request = 0;
+static uint8_t msp_trim_state = 0;
+
+enum
+{
     WAIT_$ = 0,
     WAIT_M,
     WAIT_ARROW,
@@ -203,6 +214,27 @@ static void* send_msp_thread(void* arg)
                     msp_write_cmd(MSP_EEPROM_WRITE);
                     msp_eeprom_write_request = 0;
                 }
+                if(msp_trim_request)
+                {
+                    switch(MSP_TRIM_UP)
+                    {
+                        case TRIM_UP:
+                            msp_write_cmd(MSP_TRIM_UP);
+                            break;
+                        case TRIM_DOWN:
+                            msp_write_cmd(MSP_TRIM_DOWN);
+                            break;
+                        case TRIM_LEFT:
+                            msp_write_cmd(MSP_TRIM_LEFT);
+                            break;
+                        case TRIM_RIGHT:
+                            msp_write_cmd(MSP_TRIM_RIGHT);
+                            break;
+                        default :
+                            break;
+                    }
+                    msp_trim_request = 0;
+                }
                 cmd_state++;
                 break;
             case 1:
@@ -343,4 +375,28 @@ void msp_reset_alt_mod()
 void msp_get_info(drone_info_t* drone_info)
 {
     memcpy(drone_info, &drone_info_tmp, sizeof(drone_info_tmp));
+}
+
+void msp_set_trim_up()
+{
+    msp_trim_request = 1;
+    msp_trim_state = TRIM_UP;
+}
+
+void msp_set_trim_down()
+{
+    msp_trim_request = 1;
+    msp_trim_state = TRIM_DOWN;
+}
+
+void msp_set_trim_left()
+{
+    msp_trim_request = 1;
+    msp_trim_state = TRIM_LEFT;
+}
+
+void msp_set_trim_right()
+{
+    msp_trim_request = 1;
+    msp_trim_state = TRIM_RIGHT;
 }
