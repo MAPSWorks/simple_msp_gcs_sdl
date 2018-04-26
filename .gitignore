@@ -35,6 +35,7 @@
 *.out
 *.app
 simple_msp_gcs
+video.*
 
 ### CMake ###
 CMakeCache.txt

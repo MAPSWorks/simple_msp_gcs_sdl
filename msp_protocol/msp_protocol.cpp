@@ -216,7 +216,7 @@ static void* send_msp_thread(void* arg)
                 }
                 if(msp_trim_request)
                 {
-                    switch(MSP_TRIM_UP)
+                    switch(msp_trim_state)
                     {
                         case TRIM_UP:
                             msp_write_cmd(MSP_TRIM_UP);
