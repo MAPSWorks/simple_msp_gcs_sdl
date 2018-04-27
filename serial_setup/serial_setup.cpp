@@ -17,7 +17,7 @@ static int serial_device_file = -1;
 
 void serial_init()
 {
-    FILE* stream = popen( "dmesg | grep \"attached to tty\"", "r" );
+    FILE* stream = popen( "ls -tr /dev/ | grep \"tty\"", "r" );
 
     ostringstream output;
 
@@ -26,8 +26,8 @@ void serial_init()
     //check dmesg to find new device
     while(!feof(stream) && !ferror(stream))
     {
-        char buf[128];
-        int bytesRead = fread(buf, 1, 128, stream);
+        char buf[1000];
+        int bytesRead = fread(buf, 1, 1000, stream);
         output.write(buf, bytesRead);
     }
     string pre_state = output.str();
@@ -36,15 +36,15 @@ void serial_init()
 
     while(1)
     {
-        FILE* stream = popen( "dmesg | grep \"attached to tty\"", "r" );
+        FILE* stream = popen( "ls -tr /dev/ | grep \"tty\"", "r" );
 
         output.str("");
         output.clear();
         
         while(!feof(stream) && !ferror(stream))
         {
-            char buf[128];
-            int bytesRead = fread(buf, 1, 128, stream);
+            char buf[1000];
+            int bytesRead = fread(buf, 1, 1000, stream);
             output.write(buf, bytesRead);
         }
         string current_state = output.str();
@@ -52,7 +52,7 @@ void serial_init()
         pclose(stream);
         
         //something changed, check tty* device and parse
-        if(current_state.length() != pre_state.length())
+        if(current_state.length() > pre_state.length())
         {
             found_device = current_state.substr(pre_state.length()
                                                 , current_state.length()
@@ -69,6 +69,8 @@ void serial_init()
             }
             break;
         }
+
+        pre_state = current_state;
         usleep(100000);
     }
 
