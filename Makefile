@@ -285,6 +285,33 @@ rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.s:
 	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.s
 .PHONY : rpi-udp-stream-client/computer_vision/color_object_recognition.cpp.s
 
+rpi-udp-stream-client/computer_vision/get_optical_flow.o: rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.o
+
+.PHONY : rpi-udp-stream-client/computer_vision/get_optical_flow.o
+
+# target to build an object file
+rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.o:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.o
+.PHONY : rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.o
+
+rpi-udp-stream-client/computer_vision/get_optical_flow.i: rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.i
+
+.PHONY : rpi-udp-stream-client/computer_vision/get_optical_flow.i
+
+# target to preprocess a source file
+rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.i:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.i
+.PHONY : rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.i
+
+rpi-udp-stream-client/computer_vision/get_optical_flow.s: rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.s
+
+.PHONY : rpi-udp-stream-client/computer_vision/get_optical_flow.s
+
+# target to generate assembly for a file
+rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.s:
+	$(MAKE) -f CMakeFiles/simple_msp_gcs.dir/build.make CMakeFiles/simple_msp_gcs.dir/rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.s
+.PHONY : rpi-udp-stream-client/computer_vision/get_optical_flow.cpp.s
+
 rpi-udp-stream-client/computer_vision/imshow_queue.o: rpi-udp-stream-client/computer_vision/imshow_queue.cpp.o
 
 .PHONY : rpi-udp-stream-client/computer_vision/imshow_queue.o
@@ -420,6 +447,9 @@ help:
 	@echo "... rpi-udp-stream-client/computer_vision/color_object_recognition.o"
 	@echo "... rpi-udp-stream-client/computer_vision/color_object_recognition.i"
 	@echo "... rpi-udp-stream-client/computer_vision/color_object_recognition.s"
+	@echo "... rpi-udp-stream-client/computer_vision/get_optical_flow.o"
+	@echo "... rpi-udp-stream-client/computer_vision/get_optical_flow.i"
+	@echo "... rpi-udp-stream-client/computer_vision/get_optical_flow.s"
 	@echo "... rpi-udp-stream-client/computer_vision/imshow_queue.o"
 	@echo "... rpi-udp-stream-client/computer_vision/imshow_queue.i"
 	@echo "... rpi-udp-stream-client/computer_vision/imshow_queue.s"

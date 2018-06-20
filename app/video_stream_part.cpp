@@ -5,6 +5,7 @@
 #include "../rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.h"
 #include "../rpi-udp-stream-client/computer_vision/imshow_queue.h"
 #include "../rpi-udp-stream-client/computer_vision/color_object_recognition.h"
+#include "../rpi-udp-stream-client/computer_vision/get_optical_flow.h"
 
 #include "opencv2/opencv.hpp"
 using namespace cv;
@@ -97,6 +98,7 @@ static void* receive_video_udp(void* arg)
             
             avframe_mat_conversion(&picture, converted_image);
 
+            //color object detection
             color_object_t red_obj;
             color_object_t green_obj;
             color_object_t blue_obj;
@@ -112,6 +114,15 @@ static void* receive_video_udp(void* arg)
                 imshow_request("blue_obj", blue_obj.thresholded_image);
 
             imshow_request("convert", converted_image);
+
+            //optical flow
+            opt_flow_t flow_info;
+            get_optical_flow(converted_image, &flow_info);
+
+            if(!flow_info.bad_condition)
+            {
+                imshow_request("masked_img", flow_info.masked_img);
+            }
         }
 
 #ifdef SAVE_VIDEO
