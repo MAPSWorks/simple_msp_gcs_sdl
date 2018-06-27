@@ -2,10 +2,12 @@
 #include "../msp_protocol/msp_protocol.h"
 #include "../gui/gui.h"
 #include "../rpi-udp-stream-client/common_util/common_util.h" //use utils from rpi-udp-stream-client submodule
+#include "../rpi-udp-stream-client/computer_vision/get_optical_flow.h"
 #include "video_stream_part.h"
 
 #include <stdint.h>
 #include <iostream>
+#include <fstream>
 
 #include <stdio.h>
 #include <string.h>
@@ -23,6 +25,7 @@ static FormHelper* gui;
 
 //Drone's information
 static drone_info_t drone_info = {0, };
+static opt_flow_t flow;
 
 static int16_t throttle_val = 0;
 
@@ -32,6 +35,9 @@ static Eigen::VectorXf* attitude_pitch_ptr;
 static Eigen::VectorXf* attitude_yaw_ptr;
 
 static char* stream_ip;
+
+static bool log_state = 0;
+ofstream log_file;
 
 static void app_init();
 static void app_deinit();
@@ -194,6 +200,21 @@ static void app_init()
     gui->addVariable("Throttle" , drone_info.rcData[3]);
     gui->addVariable("AUX1"     , drone_info.rcData[4]);
 
+    nanogui::ref<Window> rwindow7 = gui->addWindow(Eigen::Vector2i(700, 10), "Logging");
+    gui->addGroup("Logging");
+    gui->addButton("Log start", []()
+            {
+                DEBUG_MSG("Start logging\n");
+                log_file.open("log_file.txt", 	ios::out|ios::trunc);
+                log_state = 1;
+            });
+    gui->addButton("Log stop", []()
+            {
+                DEBUG_MSG("Stop logging\n");
+                log_state = 0;
+                log_file.close();
+            });
+
     gui_set_done();
 }
 
@@ -222,6 +243,7 @@ int main(int argc, char* argv[])
     uint8_t sdl_event_state = 0;
 
     auto pre_display_t = chrono::high_resolution_clock::now();
+    auto pre_log_t = chrono::high_resolution_clock::now();
 
     while(!is_quit())
     {
@@ -347,7 +369,27 @@ int main(int argc, char* argv[])
 
             gui_draw(event);
 
-            pre_display_t = chrono::high_resolution_clock::now();        
+            pre_display_t = chrono::high_resolution_clock::now();
+        }
+
+        // NanoGUI display
+        auto current_log_t = chrono::high_resolution_clock::now();
+        auto log_elapsed = chrono::duration_cast<chrono::milliseconds>(current_log_t - pre_log_t);
+
+        if(log_elapsed.count() >20)
+        {
+            if(log_state)
+            {
+                get_opt_flow_data(&flow);
+                DEBUG_MSG("memcpy done\n");
+                log_file << drone_info.gyroData[0] 
+                         << '\t' << drone_info.gyroData[1] 
+                         << '\t' << drone_info.gyroData[2] 
+                         << '\t' << flow.output_point.x
+                         << '\t' << flow.output_point.y
+                         << '\t' << endl;
+            }
+            pre_log_t = chrono::high_resolution_clock::now();
         }
     }
 

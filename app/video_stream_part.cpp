@@ -15,6 +15,8 @@ static pthread_t keep_alive_id;
 
 static uint8_t video_quit = 1;
 
+static opt_flow_t flow_glov;
+
 void set_video_quit()
 {
     video_quit = 1;
@@ -118,6 +120,7 @@ static void* receive_video_udp(void* arg)
             //optical flow
             opt_flow_t flow_info;
             get_optical_flow(converted_image, &flow_info);
+            memcpy(&flow_glov, &flow_info, sizeof(flow_info));
 
             if(!flow_info.bad_condition)
             {
@@ -198,4 +201,9 @@ void video_start()
 void video_stop()
 {
     set_video_quit();
+}
+
+void get_opt_flow_data(opt_flow_t* flow)
+{
+    memcpy(flow, &flow_glov, sizeof(flow_glov));
 }
