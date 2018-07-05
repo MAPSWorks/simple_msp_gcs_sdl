@@ -17,7 +17,7 @@ add_executable( ${CMAKE_PROJECT_NAME} ${SRCS} )
 find_package( OpenCV REQUIRED )
 
 set( GCC_CMD_FLAGS )
-set( GCC_COVERAGE_COMPILE_FLAGS -DSTANDALONE -D__STDC_CONSTANT_MACROS -pipe -g -Wall -Wno-unused-result -Wno-deprecated-declarations ${GCC_CMD_FLAGS})
+set( GCC_COVERAGE_COMPILE_FLAGS -DSTANDALONE -D__STDC_CONSTANT_MACROS -pipe -g -Wall -Wno-unused-result -Wno-deprecated-declarations -Wno-misleading-indentation -Wno-int-in-bool-context -Wno-sign-compare ${GCC_CMD_FLAGS})
 set( GCC_COVERAGE_LINK_FLAGS -lpthread -lSDL2main -lSDL2 -lavformat -lavcodec -lavutil -lswscale )
 
 target_compile_options( ${CMAKE_PROJECT_NAME} PRIVATE ${GCC_COVERAGE_COMPILE_FLAGS} )
