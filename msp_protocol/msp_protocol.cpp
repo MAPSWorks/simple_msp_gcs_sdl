@@ -20,6 +20,8 @@ static uint8_t msp_acc_calib_request = 0;
 static uint8_t msp_mag_calib_request = 0;
 static uint8_t msp_eeprom_write_request = 0;
 
+static int16_t flow_output[2];
+
 enum
 {
     TRIM_UP = 0,
@@ -171,8 +173,8 @@ static int msp_parse_cmd(uint8_t* received_cmd, uint8_t* received_size, uint8_t*
 static void msp_send_rc()
 {
     uint8_t rc[5];
-    rc[rcRoll]      = RC_MID + roll_input;
-    rc[rcPitch]     = RC_MID + pitch_input;
+    rc[rcRoll]      = RC_MID + roll_input + flow_output[0];
+    rc[rcPitch]     = RC_MID + pitch_input + flow_output[1];
     rc[rcYaw]       = RC_MID + yaw_input;
     rc[rcThrottle]  = RC_MIN + throttle_input;
     rc[rcAux1]      = RC_MIN + althold_switch_input;
@@ -399,4 +401,21 @@ void msp_set_trim_right()
 {
     msp_trim_request = 1;
     msp_trim_state = TRIM_RIGHT;
+}
+
+void msp_set_flow_output(int16_t x, int16_t y)
+{
+    if(x > 20)
+        flow_output[0] = 20;
+    else if(x < -20)
+        flow_output[0] = -20;
+    else
+        flow_output[0] = x;
+
+    if(y > 20)
+        flow_output[1] = 20;
+    else if(y < -20)
+        flow_output[1] = -20;
+    else
+        flow_output[1] = y;
 }

@@ -4,6 +4,7 @@
 #include "../rpi-udp-stream-client/common_util/common_util.h" //use utils from rpi-udp-stream-client submodule
 #include "../rpi-udp-stream-client/computer_vision/get_optical_flow.h"
 #include "video_stream_part.h"
+#include "flow_mode.h"
 
 #include <stdint.h>
 #include <iostream>
@@ -26,6 +27,8 @@ static FormHelper* gui;
 //Drone's information
 static drone_info_t drone_info = {0, };
 static opt_flow_t flow;
+static int16_t flow_mode_output[2];
+static bool flow_mode_state = 0;
 
 static int16_t throttle_val = 0;
 
@@ -200,7 +203,7 @@ static void app_init()
     gui->addVariable("Throttle" , drone_info.rcData[3]);
     gui->addVariable("AUX1"     , drone_info.rcData[4]);
 
-    nanogui::ref<Window> rwindow7 = gui->addWindow(Eigen::Vector2i(700, 10), "Logging");
+    nanogui::ref<Window> rwindow7 = gui->addWindow(Eigen::Vector2i(850, 10), "Logging");
     gui->addGroup("Logging");
     gui->addButton("Log start", []()
             {
@@ -213,6 +216,19 @@ static void app_init()
                 DEBUG_MSG("Stop logging\n");
                 log_state = 0;
                 log_file.close();
+            });
+
+    nanogui::ref<Window> rwindow8 = gui->addWindow(Eigen::Vector2i(850, 200), "Flow mode");
+    gui->addGroup("Flow mode");
+    gui->addButton("Flow mode start", []()
+            {
+                DEBUG_MSG("Start Flow mode\n");
+                flow_mode_state = 1;
+            });
+    gui->addButton("Flow mode stop", []()
+            {
+                DEBUG_MSG("Stop Flow mode\n");
+                flow_mode_state = 0;
             });
 
     gui_set_done();
@@ -244,6 +260,7 @@ int main(int argc, char* argv[])
 
     auto pre_display_t = chrono::high_resolution_clock::now();
     auto pre_log_t = chrono::high_resolution_clock::now();
+    auto pre_flow_t = chrono::high_resolution_clock::now();
 
     while(!is_quit())
     {
@@ -372,7 +389,32 @@ int main(int argc, char* argv[])
             pre_display_t = chrono::high_resolution_clock::now();
         }
 
-        // NanoGUI display
+        // flow mode
+        auto current_flow_t = chrono::high_resolution_clock::now();
+        auto flow_elapsed = chrono::duration_cast<chrono::milliseconds>(current_flow_t - pre_flow_t);
+
+        if(flow_elapsed.count() >20)
+        {
+            if(flow_mode_state)
+            {
+                get_opt_flow_data(&flow);
+
+                flow_mode_set_flow(flow.output_point.x, flow.output_point.y);
+                flow_mode_set_gyro(drone_info.gyroData[0], drone_info.gyroData[1]);
+                flow_mode_set_altitude(drone_info.height);
+
+                do_flow_mode();
+
+                get_flow_output(&flow_mode_output[0], &flow_mode_output[1]);
+                msp_set_flow_output(flow_mode_output[0], flow_mode_output[1]);
+            }
+            else
+                msp_set_flow_output(0, 0);
+
+            pre_flow_t = chrono::high_resolution_clock::now();
+        }
+
+        // loggging
         auto current_log_t = chrono::high_resolution_clock::now();
         auto log_elapsed = chrono::duration_cast<chrono::milliseconds>(current_log_t - pre_log_t);
 
@@ -380,13 +422,13 @@ int main(int argc, char* argv[])
         {
             if(log_state)
             {
-                get_opt_flow_data(&flow);
-                DEBUG_MSG("memcpy done\n");
                 log_file << drone_info.gyroData[0] 
                          << '\t' << drone_info.gyroData[1] 
                          << '\t' << drone_info.gyroData[2] 
                          << '\t' << flow.output_point.x
                          << '\t' << flow.output_point.y
+                         << '\t' << flow_mode_output[0]
+                         << '\t' << flow_mode_output[1]
                          << '\t' << endl;
             }
             pre_log_t = chrono::high_resolution_clock::now();

@@ -116,4 +116,6 @@ void msp_set_trim_down();
 void msp_set_trim_left();
 void msp_set_trim_right();
 
+void msp_set_flow_output(int16_t x, int16_t y);
+
 #endif
