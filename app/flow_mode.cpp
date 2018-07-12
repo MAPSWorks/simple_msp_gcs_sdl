@@ -51,7 +51,7 @@ void do_flow_mode()
     const float tau = 0.05;
     const float ts = 0.02;
 
-    const float output_gain = 4.0f;
+    const float output_gain = 10.0f;
 
     for(int i = 0; i < 2; i++)
     {
