@@ -1,5 +1,6 @@
 #include "video_stream_part.h"
 #include "video_log.h"
+#include "../msp_protocol/msp_protocol.h"
 
 #include "../rpi-udp-stream-client/udp_setup/udp_setup.h"
 #include "../rpi-udp-stream-client/common_util/common_util.h"
@@ -7,6 +8,7 @@
 #include "../rpi-udp-stream-client/computer_vision/imshow_queue.h"
 #include "../rpi-udp-stream-client/computer_vision/color_object_recognition.h"
 #include "../rpi-udp-stream-client/computer_vision/get_optical_flow.h"
+#include "../rpi-udp-stream-client/computer_vision/pos_compensation.h"
 
 #include "opencv2/opencv.hpp"
 using namespace cv;
@@ -101,6 +103,10 @@ static void* receive_video_udp(void* arg)
             
             avframe_mat_conversion(&picture, converted_image);
 
+            //get drone's information
+            drone_info_t drone_info;
+            msp_get_info(&drone_info);
+
             //color object detection
             color_object_t red_obj;
             color_object_t green_obj;
@@ -128,6 +134,14 @@ static void* receive_video_udp(void* arg)
             {
                 imshow_request("masked_img", flow_info.masked_img);
             }
+
+            //pos_compensation
+            Point2i actual_position;
+            Mat pos_mask;
+            converted_image.copyTo(pos_mask);
+            actual_position = find_position_in_image(converted_image, drone_info.angle[0], drone_info.angle[1], drone_info.height);
+            circle(pos_mask, actual_position, 5, Scalar(0,0,255), CV_FILLED, 1, 0);
+            imshow_request("actual_position", pos_mask);
         }
 
 #ifdef SAVE_VIDEO
