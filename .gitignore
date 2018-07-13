@@ -53,8 +53,10 @@ tags
 
 # IDE and log file
 .vscode
-log_file.txt
-log_file*.ods
+*.txt
+*.ods
+*.avi
+*.mp4
 
 
 # End of https://www.gitignore.io/api/c++,cmake

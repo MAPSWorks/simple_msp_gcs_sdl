@@ -5,6 +5,7 @@
 #include "../rpi-udp-stream-client/computer_vision/get_optical_flow.h"
 #include "video_stream_part.h"
 #include "flow_mode.h"
+#include "video_log.h"
 
 #include <stdint.h>
 #include <iostream>
@@ -216,6 +217,16 @@ static void app_init()
                 DEBUG_MSG("Stop logging\n");
                 log_state = 0;
                 log_file.close();
+            });
+    gui->addButton("Log video start", []()
+            {
+                DEBUG_MSG("Start logging with video\n");
+                video_log_init();
+            });
+    gui->addButton("Log video stop", []()
+            {
+                DEBUG_MSG("Stop logging with video\n");
+                video_log_deinit();
             });
 
     nanogui::ref<Window> rwindow8 = gui->addWindow(Eigen::Vector2i(850, 200), "Flow mode");

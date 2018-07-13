@@ -1,4 +1,5 @@
 #include "video_stream_part.h"
+#include "video_log.h"
 
 #include "../rpi-udp-stream-client/udp_setup/udp_setup.h"
 #include "../rpi-udp-stream-client/common_util/common_util.h"
@@ -115,6 +116,7 @@ static void* receive_video_udp(void* arg)
             if(blue_obj.is_recognized)
                 imshow_request("blue_obj", blue_obj.thresholded_image);
 
+            save_this_frame(converted_image);
             imshow_request("convert", converted_image);
 
             //optical flow
