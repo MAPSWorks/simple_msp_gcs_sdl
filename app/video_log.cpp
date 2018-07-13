@@ -25,7 +25,7 @@ void video_log_init()
     if(!is_open)
     {
         is_open = true;
-        log_video_file.open(VIDEO_FILE_NAME, CV_FOURCC('Y', 'V', '1', '2'), FPS, Size(VIDEO_WIDTH, VIDEO_HEIGHT), true);
+        log_video_file.open(VIDEO_FILE_NAME, CV_FOURCC('M', 'P', '4', '2'), FPS, Size(VIDEO_WIDTH, VIDEO_HEIGHT), true);
         log_video_sensor_file.open(SENSOR_TEXT_NAME, ios::out|ios::trunc);
     }
 }

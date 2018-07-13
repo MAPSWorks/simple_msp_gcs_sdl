@@ -122,9 +122,6 @@ static void* receive_video_udp(void* arg)
             if(blue_obj.is_recognized)
                 imshow_request("blue_obj", blue_obj.thresholded_image);
 
-            save_this_frame(converted_image);
-            imshow_request("convert", converted_image);
-
             //optical flow
             opt_flow_t flow_info;
             get_optical_flow(converted_image, &flow_info);
@@ -142,6 +139,9 @@ static void* receive_video_udp(void* arg)
             actual_position = find_position_in_image(converted_image, drone_info.angle[0], drone_info.angle[1], drone_info.height);
             circle(pos_mask, actual_position, 5, Scalar(0,0,255), CV_FILLED, 1, 0);
             imshow_request("actual_position", pos_mask);
+
+            save_this_frame(pos_mask);
+            imshow_request("convert", converted_image);
         }
 
 #ifdef SAVE_VIDEO
