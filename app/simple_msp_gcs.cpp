@@ -31,7 +31,9 @@ static opt_flow_t flow;
 static int16_t flow_mode_output[2];
 static bool flow_mode_state = 0;
 
+//Throttle control mode
 static int16_t throttle_val = 0;
+static bool is_auto_takeoff = false;
 
 static Eigen::VectorXf* altitude_func_ptr;
 static Eigen::VectorXf* attitude_roll_ptr;
@@ -204,7 +206,7 @@ static void app_init()
     gui->addVariable("Throttle" , drone_info.rcData[3]);
     gui->addVariable("AUX1"     , drone_info.rcData[4]);
 
-    nanogui::ref<Window> rwindow7 = gui->addWindow(Eigen::Vector2i(850, 10), "Logging");
+    nanogui::ref<Window> rwindow7 = gui->addWindow(Eigen::Vector2i(880, 10), "Logging");
     gui->addGroup("Logging");
     gui->addButton("Log start", []()
             {
@@ -229,7 +231,7 @@ static void app_init()
                 video_log_deinit();
             });
 
-    nanogui::ref<Window> rwindow8 = gui->addWindow(Eigen::Vector2i(850, 200), "Flow mode");
+    nanogui::ref<Window> rwindow8 = gui->addWindow(Eigen::Vector2i(880, 200), "Flow mode");
     gui->addGroup("Flow mode");
     gui->addButton("Flow mode start", []()
             {
@@ -240,6 +242,14 @@ static void app_init()
             {
                 DEBUG_MSG("Stop Flow mode\n");
                 flow_mode_state = 0;
+            });
+
+    nanogui::ref<Window> rwindow9 = gui->addWindow(Eigen::Vector2i(880, 420), "Auto TakeOff mode");
+    gui->addGroup("Auto TakeOff");
+    gui->addButton("TakeOff start", []()
+            {
+                DEBUG_MSG("Start TakeOff\n");
+                is_auto_takeoff = true;
             });
 
     gui_set_done();
@@ -269,6 +279,8 @@ int main(int argc, char* argv[])
     SDL_Event event;
     uint8_t sdl_event_state = 0;
 
+    auto pre_drone_info_t = chrono::high_resolution_clock::now();
+    auto pre_takeoff_t = chrono::high_resolution_clock::now();
     auto pre_display_t = chrono::high_resolution_clock::now();
     auto pre_log_t = chrono::high_resolution_clock::now();
     auto pre_flow_t = chrono::high_resolution_clock::now();
@@ -281,33 +293,76 @@ int main(int argc, char* argv[])
         const uint8_t *key_state = SDL_GetKeyboardState(NULL);
         static uint8_t pre_key_state[SDL_NUM_SCANCODES] = {SDL_SCANCODE_UNKNOWN,};
 
-        // Event driven loop
-        if(sdl_event_state)
+        // NanoGUI display
+        auto current_drone_info_t = chrono::high_resolution_clock::now();
+        auto drone_info_elapsed = chrono::duration_cast<chrono::milliseconds>(current_drone_info_t - pre_drone_info_t);
+
+        if(drone_info_elapsed.count() > 6)
         {
-            switch(event.type)
+            msp_get_info(&drone_info);
+            pre_drone_info_t = chrono::high_resolution_clock::now();
+        }
+
+        //Automatically takeoff 
+        if(is_auto_takeoff)
+        {
+            auto current_takeoff_t = chrono::high_resolution_clock::now();
+            auto takeoff_elapsed = chrono::duration_cast<chrono::milliseconds>(current_takeoff_t - pre_takeoff_t);
+
+            if(takeoff_elapsed.count() > 10)
             {
-                case SDL_QUIT:
-                    set_quit();
-                    break;
+                //automatically set throttle
+                //higher than mid-point
+                if(drone_info.height < 10)
+                {
+                    throttle_val++;
+                    if(throttle_val > 175)
+                        throttle_val = 175;
+                    msp_throttle(throttle_val);
+                }
+
+                if(drone_info.height >= 100)
+                {
+                    DEBUG_MSG("Go to ALT HOLD mode\n");
+                    if(!drone_info.baro_mode_status)
+                        msp_set_alt_mod();
+                    else
+                        is_auto_takeoff = false;
+                }
+
+                pre_takeoff_t = chrono::high_resolution_clock::now();
             }
-            if(event.type == SDL_MOUSEWHEEL)
+        }
+        else
+        {
+            // Event driven loop
+            if(sdl_event_state)
             {
-                if(event.wheel.y == 1) // scroll up
+                switch(event.type)
                 {
-                    DEBUG_MSG("mouse wheel up\n");
-                    throttle_val += 3;
+                    case SDL_QUIT:
+                        set_quit();
+                        break;
                 }
-                else if(event.wheel.y == -1) // scroll down
+                if(event.type == SDL_MOUSEWHEEL)
                 {
-                    DEBUG_MSG("mouse wheel down\n");
-                    throttle_val -= 3;
+                    if(event.wheel.y == 1) // scroll up
+                    {
+                        DEBUG_MSG("mouse wheel up\n");
+                        throttle_val += 3;
+                    }
+                    else if(event.wheel.y == -1) // scroll down
+                    {
+                        DEBUG_MSG("mouse wheel down\n");
+                        throttle_val -= 3;
+                    }
+                    if(throttle_val > 250)
+                        throttle_val = 250;
+                    if(throttle_val < 0)
+                        throttle_val = 0;
+                    msp_throttle(throttle_val);
+                    DEBUG_MSG("Throttle value : %d\n", throttle_val);
                 }
-                if(throttle_val > 250)
-                    throttle_val = 250;
-                if(throttle_val < 0)
-                    throttle_val = 0;
-                msp_throttle(throttle_val);
-                DEBUG_MSG("Throttle value : %d\n", throttle_val);
             }
         }
         
@@ -433,13 +488,14 @@ int main(int argc, char* argv[])
         {
             if(log_state)
             {
-                log_file << drone_info.gyroData[0] 
-                         << '\t' << drone_info.gyroData[1] 
-                         << '\t' << drone_info.gyroData[2] 
-                         << '\t' << flow.output_point.x
-                         << '\t' << flow.output_point.y
+                log_file //<< drone_info.gyroData[0] 
+                         //<< '\t' << drone_info.gyroData[1] 
+                         //<< '\t' << drone_info.gyroData[2] 
+                         //<< '\t' << flow.output_point.x
+                         //<< '\t' << flow.output_point.y
                          << '\t' << flow_mode_output[0]
                          << '\t' << flow_mode_output[1]
+                         << '\t' << drone_info.height
                          << '\t' << endl;
             }
             pre_log_t = chrono::high_resolution_clock::now();

@@ -140,7 +140,7 @@ static void* receive_video_udp(void* arg)
             circle(pos_mask, actual_position, 5, Scalar(0,0,255), CV_FILLED, 1, 0);
             imshow_request("actual_position", pos_mask);
 
-            save_this_frame(pos_mask);
+            save_this_frame(converted_image);
             imshow_request("convert", converted_image);
         }
 

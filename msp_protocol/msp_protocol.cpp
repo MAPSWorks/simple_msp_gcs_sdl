@@ -324,22 +324,22 @@ void msp_eeprom_write()
 
 void msp_left()
 {
-    roll_input = -12;
+    roll_input = -25;
 }
 
 void msp_right()
 {
-    roll_input = 12;
+    roll_input = 25;
 }
 
 void msp_forward()
 {
-    pitch_input = 12;
+    pitch_input = 25;
 }
 
 void msp_backward()
 {
-    pitch_input = -12;
+    pitch_input = -25;
 }
 
 void msp_turn_left()
@@ -405,17 +405,17 @@ void msp_set_trim_right()
 
 void msp_set_flow_output(int16_t x, int16_t y)
 {
-    if(x > 20)
-        flow_output[0] = 20;
-    else if(x < -20)
-        flow_output[0] = -20;
+    if(x > 25)
+        flow_output[0] = 25;
+    else if(x < -25)
+        flow_output[0] = -25;
     else
         flow_output[0] = x;
 
-    if(y > 20)
-        flow_output[1] = 20;
-    else if(y < -20)
-        flow_output[1] = -20;
+    if(y > 25)
+        flow_output[1] = 25;
+    else if(y < -25)
+        flow_output[1] = -25;
     else
         flow_output[1] = y;
 }

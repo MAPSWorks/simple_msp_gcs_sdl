@@ -42,27 +42,31 @@ void do_flow_mode()
     DEBUG_MSG("flow_x : %d, flow_y : %d\n", flow_compensated[0], flow_compensated[1]);
     */
 
-    const int gyro_th = 150;
+    const int gyro_th = 300;
     float altitude_float = altitude / 100.0f; // 1 m based altitude compensate
+    float gyro_gain[2];
 
-    static int16_t pre_flow[2] = {0, 0};
+    //static int16_t pre_flow[2] = {0, 0};
     int16_t current_flow[2];
 
-    const float tau = 0.05;
-    const float ts = 0.02;
+    //const float tau = 0.05;
+    //const float ts = 0.02;
 
     const float output_gain = 10.0f;
 
     for(int i = 0; i < 2; i++)
     {
+        gyro_gain[i] = (1 - gyro[i]/gyro_th);
+        /*
         if((abs(gyro[0]) > gyro_th) || (abs(gyro[1]) > gyro_th))
             current_flow[i] = 0;
         else
             current_flow[i] = output_gain*altitude_float*flow[i];
+        */
+        current_flow[i] = gyro_gain[i]*output_gain*altitude_float*flow[i];
+        flow_compensated[i] = current_flow[i];//(tau*pre_flow[i] + ts*current_flow[i])/(tau +ts);
 
-        flow_compensated[i] = (tau*pre_flow[i] + ts*current_flow[i])/(tau +ts);
-
-        pre_flow[i] = flow_compensated[i];
+        //pre_flow[i] = flow_compensated[i];
     }
 }
 
