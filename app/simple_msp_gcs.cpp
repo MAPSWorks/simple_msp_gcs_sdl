@@ -316,12 +316,12 @@ int main(int argc, char* argv[])
                 if(drone_info.height < 10)
                 {
                     throttle_val++;
-                    if(throttle_val > 175)
-                        throttle_val = 175;
+                    if(throttle_val > 165)
+                        throttle_val = 165;
                     msp_throttle(throttle_val);
                 }
 
-                if(drone_info.height >= 100)
+                if(drone_info.height >= 80)
                 {
                     DEBUG_MSG("Go to ALT HOLD mode\n");
                     if(!drone_info.baro_mode_status)
@@ -493,9 +493,15 @@ int main(int argc, char* argv[])
                          //<< '\t' << drone_info.gyroData[2] 
                          //<< '\t' << flow.output_point.x
                          //<< '\t' << flow.output_point.y
-                         << '\t' << flow_mode_output[0]
-                         << '\t' << flow_mode_output[1]
+                         //<< '\t' << flow_mode_output[0]
+                         //<< '\t' << flow_mode_output[1]
                          << '\t' << drone_info.height
+                         << '\t' << drone_info.angle[0]
+                         << '\t' << drone_info.angle[1]
+                         << '\t' << drone_info.rcData[0]
+                         << '\t' << drone_info.rcData[1]
+                         << '\t' << drone_info.rcData[2]
+                         << '\t' << drone_info.rcData[3]
                          << '\t' << endl;
             }
             pre_log_t = chrono::high_resolution_clock::now();

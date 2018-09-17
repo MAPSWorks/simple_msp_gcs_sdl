@@ -251,7 +251,7 @@ static void* send_msp_thread(void* arg)
                 break;
         }
 
-        usleep(6666);
+        usleep(10000);
     }
     pthread_exit((void*)0);
 }
