@@ -48,6 +48,8 @@
 #define MSP_TRIM_RIGHT           156
 #define MSP_SENSORS              157
 #define MSP_SET_TINY_RC          158
+
+#define MSP_TEST                 159   //for checking error while serial communication, stress test of sending/receiving MSP 
 //--------------add for Serial remote control end------------//
 
 #define MSP_SET_RAW_RC           200   //in message          8 rc chan
@@ -117,5 +119,9 @@ void msp_set_trim_left();
 void msp_set_trim_right();
 
 void msp_set_flow_output(int16_t x, int16_t y);
+
+void msp_test_enable(uint8_t enable);
+void msp_test_set(uint8_t send_size, uint8_t receive_size, uint32_t send_interval, uint16_t send_count);
+void msp_test_get_info(uint16_t* send_count, uint16_t* receive_count, uint16_t* drone_cycle_time, uint16_t* drone_cycle_time_max, uint8_t* received_size);
 
 #endif

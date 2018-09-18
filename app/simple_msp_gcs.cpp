@@ -40,6 +40,17 @@ static Eigen::VectorXf* attitude_roll_ptr;
 static Eigen::VectorXf* attitude_pitch_ptr;
 static Eigen::VectorXf* attitude_yaw_ptr;
 
+static uint8_t test_sending_size = 0;
+static uint8_t test_receiving_size = 0;
+static uint32_t test_send_interval = 0;
+static uint16_t test_count = 0;
+
+static uint8_t test_received_size = 255;
+static uint16_t test_cycle_time = 9999;
+static uint16_t test_cycle_time_max = 9999;
+static uint16_t receiving_count = 9999;
+static uint16_t sending_count = 9999;
+
 static char* stream_ip;
 
 static bool log_state = 0;
@@ -244,13 +255,64 @@ static void app_init()
                 flow_mode_state = 0;
             });
 
-    nanogui::ref<Window> rwindow9 = gui->addWindow(Eigen::Vector2i(880, 420), "Auto TakeOff mode");
+    nanogui::ref<Window> rwindow9 = gui->addWindow(Eigen::Vector2i(880, 350), "Auto TakeOff mode");
     gui->addGroup("Auto TakeOff");
     gui->addButton("TakeOff start", []()
             {
                 DEBUG_MSG("Start TakeOff\n");
                 is_auto_takeoff = true;
             });
+
+    nanogui::ref<Window> rwindow10 = gui->addWindow(Eigen::Vector2i(1060, 10), "MSP test enable");
+    gui->addGroup("Enable");
+    gui->addButton("Enable", []()
+            {
+                DEBUG_MSG("Enable MSP test\n");
+                msp_test_enable(1);
+            });
+    gui->addButton("Disable", []()
+            {
+                DEBUG_MSG("Disable MSP test\n");
+                msp_test_enable(0);
+            });
+            
+    nanogui::ref<Window> rwindow11 = gui->addWindow(Eigen::Vector2i(1060, 150), "MSP test set");
+    rwindow11->setLayout( new GroupLayout() );
+    gui->addVariable("MSP send size", test_sending_size);
+    nanogui::Slider* send_size_slider = rwindow11->add<nanogui::Slider>();
+    send_size_slider->setCallback([](float value)
+            {
+                test_sending_size = value * 64;
+            });
+    gui->addVariable("MSP receive size", test_receiving_size);
+    nanogui::Slider* receive_size_slider = rwindow11->add<nanogui::Slider>();
+    receive_size_slider->setCallback([](float value)
+            {
+                test_receiving_size = value * 64;
+            });
+    gui->addVariable("MSP send interval", test_send_interval);
+    nanogui::Slider* send_interval_slider = rwindow11->add<nanogui::Slider>();
+    send_interval_slider->setCallback([](float value)
+            {
+                test_send_interval = value * 1000000;
+            });
+    gui->addVariable("MSP send count", test_count);
+    nanogui::Slider* send_count_slider = rwindow11->add<nanogui::Slider>();
+    send_count_slider->setCallback([](float value)
+            {
+                test_count = value * 10000;
+            });
+    gui->addButton("Setting up", []()
+            {
+                msp_test_set(test_sending_size, test_receiving_size, test_send_interval, test_count);
+            });
+    
+    nanogui::ref<Window> rwindow12 = gui->addWindow(Eigen::Vector2i(1060, 520), "MSP test result");
+    gui->addVariable("send count", sending_count);
+    gui->addVariable("receive count", receiving_count);
+    gui->addVariable("received size", test_received_size);
+    gui->addVariable("cycle time", test_cycle_time);
+    gui->addVariable("max cycle time", test_cycle_time_max);
 
     gui_set_done();
 }
@@ -447,6 +509,8 @@ int main(int argc, char* argv[])
             attitude_roll[MAX_PLOT_SIZE-1] = drone_info.angle[0]/2000.0+0.5;
             attitude_pitch[MAX_PLOT_SIZE-1] = drone_info.angle[1]/2000.0+0.5;
             attitude_yaw[MAX_PLOT_SIZE-1] = drone_info.heading/360.0+0.5;
+
+            msp_test_get_info(&sending_count, &receiving_count, &test_cycle_time, &test_cycle_time_max, &test_received_size);
 
             gui->refresh();
 

@@ -86,6 +86,78 @@ static void msp_write_buf(uint8_t cmd, uint8_t* buf, uint8_t size)
     serial_write(checksum);
 }
 
+static uint8_t is_test_mode = 0;
+static uint32_t test_send_interval = 0;
+static uint16_t test_count = 0;
+static uint8_t test_sending_size = 0;
+static uint8_t test_receiving_size = 0;
+static uint8_t test_received_size = 0;
+static uint16_t test_cycle_time = 0;
+static uint16_t test_cycle_time_max = 0;
+static uint16_t sending_count = 0;
+static uint16_t receiving_count = 0;
+
+static void msp_test_send(uint8_t test_send_size, uint8_t test_receive_size, uint32_t send_interval)
+{
+    uint8_t checksum = 0;
+    checksum = MSP_TEST^(test_send_size+1);
+
+    serial_write('$');
+    serial_write('M');
+    serial_write('<');
+    serial_write(test_send_size+1);
+    serial_write(MSP_TEST);
+    serial_write(test_receive_size);
+    checksum ^= test_receive_size;
+    for(uint8_t i = 0; i < test_send_size; i++)
+    {
+        serial_write((uint8_t)0);
+        checksum ^= (uint8_t)0;
+    }
+    serial_write(checksum);
+    sending_count++;
+    usleep(send_interval);
+}
+
+static void msp_test_receive(uint8_t received_size, uint8_t* received_buf)
+{
+    uint16_t* buf_16 = (uint16_t*)received_buf;
+
+    test_received_size = received_size;
+    test_cycle_time = buf_16[0];
+    if(test_cycle_time > test_cycle_time_max)
+        test_cycle_time_max = test_cycle_time;
+    receiving_count++;
+}
+
+void msp_test_enable(uint8_t enable)
+{
+    if(enable == 1)
+        is_test_mode = 1;
+    else if(enable == 0)
+        is_test_mode = 0;
+}
+
+void msp_test_set(uint8_t send_size, uint8_t receive_size, uint32_t send_interval, uint16_t send_count)
+{
+    sending_count = 0;
+    receiving_count = 0;
+ 
+    test_send_interval = send_interval;
+    test_count = send_count;
+    test_sending_size = send_size;
+    test_receiving_size = receive_size;
+}
+
+void msp_test_get_info(uint16_t* send_count, uint16_t* receive_count, uint16_t* drone_cycle_time, uint16_t* drone_cycle_time_max, uint8_t* received_size)
+{
+    *send_count = sending_count;
+    *receive_count = receiving_count;
+    *drone_cycle_time = test_cycle_time;
+    *drone_cycle_time_max = test_cycle_time_max;
+    *received_size = test_received_size;
+}
+
 static int msp_parse_cmd(uint8_t* received_cmd, uint8_t* received_size, uint8_t* received_buf)
 {
     int retval = 0;
@@ -188,70 +260,81 @@ static void* send_msp_thread(void* arg)
 
     while(!is_quit())
     {
-        switch(cmd_state)
+        if(!is_test_mode)
         {
-            case 0:
-                if(msp_arm_request)
-                {
-                    msp_write_cmd(MSP_ARM);
-                    msp_arm_request = 0;
-                }
-                if(msp_disarm_request)
-                {
-                    msp_write_cmd(MSP_DISARM);
-                    msp_disarm_request = 0;
-                }
-                if(msp_acc_calib_request)
-                {
-                    msp_write_cmd(MSP_ACC_CALIBRATION);
-                    msp_acc_calib_request = 0;
-                }
-                if(msp_mag_calib_request)
-                {
-                    msp_write_cmd(MSP_MAG_CALIBRATION);
-                    msp_mag_calib_request = 0;
-                }
-                if(msp_eeprom_write_request)
-                {
-                    msp_write_cmd(MSP_EEPROM_WRITE);
-                    msp_eeprom_write_request = 0;
-                }
-                if(msp_trim_request)
-                {
-                    switch(msp_trim_state)
+            switch(cmd_state)
+            {
+                case 0:
+                    if(msp_arm_request)
                     {
-                        case TRIM_UP:
-                            msp_write_cmd(MSP_TRIM_UP);
-                            break;
-                        case TRIM_DOWN:
-                            msp_write_cmd(MSP_TRIM_DOWN);
-                            break;
-                        case TRIM_LEFT:
-                            msp_write_cmd(MSP_TRIM_LEFT);
-                            break;
-                        case TRIM_RIGHT:
-                            msp_write_cmd(MSP_TRIM_RIGHT);
-                            break;
-                        default :
-                            break;
+                        msp_write_cmd(MSP_ARM);
+                        msp_arm_request = 0;
                     }
-                    msp_trim_request = 0;
-                }
-                cmd_state++;
-                break;
-            case 1:
-                msp_send_rc();
-                cmd_state++;
-                break;
-            case 2:
-                msp_write_cmd(MSP_SENSORS);
-                cmd_state++;
-            default:
-                cmd_state = 0;
-                break;
-        }
+                    if(msp_disarm_request)
+                    {
+                        msp_write_cmd(MSP_DISARM);
+                        msp_disarm_request = 0;
+                    }
+                    if(msp_acc_calib_request)
+                    {
+                        msp_write_cmd(MSP_ACC_CALIBRATION);
+                        msp_acc_calib_request = 0;
+                    }
+                    if(msp_mag_calib_request)
+                    {
+                        msp_write_cmd(MSP_MAG_CALIBRATION);
+                        msp_mag_calib_request = 0;
+                    }
+                    if(msp_eeprom_write_request)
+                    {
+                        msp_write_cmd(MSP_EEPROM_WRITE);
+                        msp_eeprom_write_request = 0;
+                    }
+                    if(msp_trim_request)
+                    {
+                        switch(msp_trim_state)
+                        {
+                            case TRIM_UP:
+                                msp_write_cmd(MSP_TRIM_UP);
+                                break;
+                            case TRIM_DOWN:
+                                msp_write_cmd(MSP_TRIM_DOWN);
+                                break;
+                            case TRIM_LEFT:
+                                msp_write_cmd(MSP_TRIM_LEFT);
+                                break;
+                            case TRIM_RIGHT:
+                                msp_write_cmd(MSP_TRIM_RIGHT);
+                                break;
+                            default :
+                                break;
+                        }
+                        msp_trim_request = 0;
+                    }
+                    cmd_state++;
+                    break;
+                case 1:
+                    msp_send_rc();
+                    cmd_state++;
+                    break;
+                case 2:
+                    msp_write_cmd(MSP_SENSORS);
+                    cmd_state++;
+                default:
+                    cmd_state = 0;
+                    break;
+            }
 
-        usleep(10000);
+            usleep(10000);
+        }
+        else //testing mode
+        {
+            if(test_count != 0)
+            {
+                msp_test_send(test_sending_size, test_receiving_size, test_send_interval);
+                test_count--;
+            }
+        }
     }
     pthread_exit((void*)0);
 }
@@ -270,6 +353,10 @@ static void* received_msp_thread(void* arg)
             {
                 case MSP_SENSORS:
                     memcpy((uint8_t*)&drone_info_tmp, received_buf, received_size);
+                    break;
+                case MSP_TEST:
+                    msp_test_receive(received_size, received_buf);
+                    break;
                 default :
                     break;
             }
