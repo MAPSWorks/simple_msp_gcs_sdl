@@ -6,6 +6,7 @@
 #include "../serial_setup/serial_setup.h"
 #include "../rpi-udp-stream-client/common_util/common_util.h"
 
+static uint8_t request_drone_info = 0;
 static drone_info_t drone_info_tmp = {0, };
 
 static int16_t roll_input = 0;
@@ -142,7 +143,10 @@ void msp_test_set(uint8_t send_size, uint8_t receive_size, uint32_t send_interva
 {
     sending_count = 0;
     receiving_count = 0;
- 
+    test_cycle_time = 0;
+    test_cycle_time_max = 0;
+    test_received_size = 0;
+
     test_send_interval = send_interval;
     test_count = send_count;
     test_sending_size = send_size;
@@ -172,7 +176,7 @@ static int msp_parse_cmd(uint8_t* received_cmd, uint8_t* received_size, uint8_t*
     static uint8_t checkSum = 0;
     static uint8_t state = WAIT_$;
 
-    if(serial_available())
+    while(serial_available())
     {
         c = serial_read();
         switch(state)
@@ -182,14 +186,19 @@ static int msp_parse_cmd(uint8_t* received_cmd, uint8_t* received_size, uint8_t*
                 break;
             case WAIT_M :
                 state = (c == 'M') ? WAIT_ARROW : WAIT_$;
+                if(c != 'M')
+                    DEBUG_MSG("error in msp receive\n");
                 break;
             case WAIT_ARROW :
                 state = (c == '>') ? WAIT_BUFSIZE : WAIT_$;
+                if(c != '>')
+                    DEBUG_MSG("error in msp receive\n");
                 break;
             case WAIT_BUFSIZE :
                 if(c > MAXBUF_SIZE)
                 {
                     state = WAIT_$; //buffer size error
+                    DEBUG_MSG("error in msp receive\n");
                 }
                 else
                 {
@@ -229,6 +238,7 @@ static int msp_parse_cmd(uint8_t* received_cmd, uint8_t* received_size, uint8_t*
                     else // error appeared in checksum
                     {
                         state = WAIT_$;
+                        DEBUG_MSG("error in msp receive\n");
                     }
                     //initialize all static variables
                     dataBufCount = 0;
@@ -265,6 +275,11 @@ static void* send_msp_thread(void* arg)
             switch(cmd_state)
             {
                 case 0:
+                    if(request_drone_info)
+                    {
+                        msp_write_cmd(MSP_SENSORS);
+                        request_drone_info = 0;
+                    }
                     if(msp_arm_request)
                     {
                         msp_write_cmd(MSP_ARM);
@@ -317,9 +332,6 @@ static void* send_msp_thread(void* arg)
                     msp_send_rc();
                     cmd_state++;
                     break;
-                case 2:
-                    msp_write_cmd(MSP_SENSORS);
-                    cmd_state++;
                 default:
                     cmd_state = 0;
                     break;
@@ -459,6 +471,11 @@ void msp_set_alt_mod()
 void msp_reset_alt_mod()
 {
     althold_switch_input = 0;
+}
+
+void msp_request_info()
+{
+    request_drone_info = 1;
 }
 
 void msp_get_info(drone_info_t* drone_info)

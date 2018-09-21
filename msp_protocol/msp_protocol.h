@@ -99,6 +99,7 @@ void msp_disarm();
 void msp_acc_calib();
 void msp_mag_calib();
 void msp_eeprom_write();
+void msp_request_info();
 void msp_get_info(drone_info_t* drone_info);
 
 void msp_left();

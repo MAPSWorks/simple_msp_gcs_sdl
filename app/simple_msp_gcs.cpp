@@ -51,6 +51,8 @@ static uint16_t test_cycle_time_max = 9999;
 static uint16_t receiving_count = 9999;
 static uint16_t sending_count = 9999;
 
+static float test_error_rate = 0;
+
 static char* stream_ip;
 
 static bool log_state = 0;
@@ -83,6 +85,12 @@ static void app_init()
     gui = gui_get_pointer();
 
     nanogui::ref<Window> rwindow = gui->addWindow(Eigen::Vector2i(10, 10), "Basic information");
+    gui->addGroup("Send request");
+    gui->addButton("Send request", []()
+            {
+                DEBUG_MSG("Sensor data request\n");
+                msp_request_info();
+            });
     gui->addGroup("Status info");
     gui->addVariable("Armed", drone_info.arm_status);
     gui->addVariable("BARO mode", drone_info.baro_mode_status);
@@ -313,6 +321,7 @@ static void app_init()
     gui->addVariable("received size", test_received_size);
     gui->addVariable("cycle time", test_cycle_time);
     gui->addVariable("max cycle time", test_cycle_time_max);
+    gui->addVariable("Error rate", test_error_rate);
 
     gui_set_done();
 }
@@ -511,6 +520,7 @@ int main(int argc, char* argv[])
             attitude_yaw[MAX_PLOT_SIZE-1] = drone_info.heading/360.0+0.5;
 
             msp_test_get_info(&sending_count, &receiving_count, &test_cycle_time, &test_cycle_time_max, &test_received_size);
+            test_error_rate = ((sending_count - receiving_count)*1.0f)/(sending_count*1.0f)*100.0f;
 
             gui->refresh();
 
