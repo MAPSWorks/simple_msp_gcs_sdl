@@ -6,6 +6,9 @@
 #include "../serial_setup/serial_setup.h"
 #include "../rpi-udp-stream-client/common_util/common_util.h"
 
+#include <iostream>
+#include <fstream>
+
 static uint8_t request_drone_info = 0;
 static drone_info_t drone_info_tmp = {0, };
 
@@ -98,19 +101,40 @@ static uint16_t test_cycle_time_max = 0;
 static uint16_t sending_count = 0;
 static uint16_t receiving_count = 0;
 
-static void msp_test_send(uint8_t test_send_size, uint8_t test_receive_size, uint32_t send_interval)
+static uint16_t received_test_counts[10000];
+static uint16_t received_test_counts_idx = 0;
+
+static void msp_test_send(uint8_t test_send_size, uint8_t test_receive_size, uint32_t send_interval, uint16_t test_count)
 {
+    if(test_send_size < 3)
+        test_send_size = 3;
+
+    if(test_receive_size < 4)
+        test_receive_size = 4;
+
     uint8_t checksum = 0;
-    checksum = MSP_TEST^(test_send_size+1);
+    checksum = MSP_TEST^test_send_size;
+
+    uint8_t test_count_lb, test_count_hb;
+    test_count_lb = (test_count & 0xff);
+    test_count_hb = ((test_count >> 8) & 0xff);
 
     serial_write('$');
     serial_write('M');
     serial_write('<');
-    serial_write(test_send_size+1);
+    serial_write(test_send_size);
     serial_write(MSP_TEST);
+
     serial_write(test_receive_size);
     checksum ^= test_receive_size;
-    for(uint8_t i = 0; i < test_send_size; i++)
+    
+    serial_write(test_count_lb);
+    checksum ^= test_count_lb;
+    
+    serial_write(test_count_hb);
+    checksum ^= test_count_hb;
+    
+    for(uint8_t i = 0; i < (test_send_size - 3); i++)
     {
         serial_write((uint8_t)0);
         checksum ^= (uint8_t)0;
@@ -126,6 +150,10 @@ static void msp_test_receive(uint8_t received_size, uint8_t* received_buf)
 
     test_received_size = received_size;
     test_cycle_time = buf_16[0];
+
+    received_test_counts[received_test_counts_idx] = buf_16[1];
+    received_test_counts_idx++;
+    
     if(test_cycle_time > test_cycle_time_max)
         test_cycle_time_max = test_cycle_time;
     receiving_count++;
@@ -160,6 +188,23 @@ void msp_test_get_info(uint16_t* send_count, uint16_t* receive_count, uint16_t* 
     *drone_cycle_time = test_cycle_time;
     *drone_cycle_time_max = test_cycle_time_max;
     *received_size = test_received_size;
+}
+
+void msp_test_save()
+{
+    std::ofstream msp_test;
+
+    msp_test.open("msp_test_result", std::ios::out|std::ios::trunc);
+
+    msp_test << "Tested count : " << sending_count << std::endl;
+    msp_test << "Received count : " << receiving_count << std::endl;
+
+    for(int i = 0; i < received_test_counts_idx; i++)
+    {
+        msp_test << received_test_counts[i] << std::endl;
+    }
+    
+    msp_test.close();
 }
 
 static int msp_parse_cmd(uint8_t* received_cmd, uint8_t* received_size, uint8_t* received_buf)
@@ -343,7 +388,7 @@ static void* send_msp_thread(void* arg)
         {
             if(test_count != 0)
             {
-                msp_test_send(test_sending_size, test_receiving_size, test_send_interval);
+                msp_test_send(test_sending_size, test_receiving_size, test_send_interval, test_count);
                 test_count--;
             }
         }

@@ -322,6 +322,11 @@ static void app_init()
     gui->addVariable("cycle time", test_cycle_time);
     gui->addVariable("max cycle time", test_cycle_time_max);
     gui->addVariable("Error rate", test_error_rate);
+    gui->addButton("Save test result", []()
+            {
+                DEBUG_MSG("Save test result done\n");
+                msp_test_save();
+            });
 
     gui_set_done();
 }

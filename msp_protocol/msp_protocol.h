@@ -124,5 +124,6 @@ void msp_set_flow_output(int16_t x, int16_t y);
 void msp_test_enable(uint8_t enable);
 void msp_test_set(uint8_t send_size, uint8_t receive_size, uint32_t send_interval, uint16_t send_count);
 void msp_test_get_info(uint16_t* send_count, uint16_t* receive_count, uint16_t* drone_cycle_time, uint16_t* drone_cycle_time_max, uint8_t* received_size);
+void msp_test_save();
 
 #endif
