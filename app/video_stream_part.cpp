@@ -7,6 +7,7 @@
 #include "../rpi-udp-stream-client/ffmpeg_setup/ffmpeg_setup.h"
 #include "../rpi-udp-stream-client/computer_vision/imshow_queue.h"
 #include "../rpi-udp-stream-client/computer_vision/color_object_recognition.h"
+#include "../rpi-udp-stream-client/computer_vision/shape_object_recognition.h"
 #include "../rpi-udp-stream-client/computer_vision/get_optical_flow.h"
 #include "../rpi-udp-stream-client/computer_vision/pos_compensation.h"
 
@@ -90,6 +91,7 @@ static void* receive_video_udp(void* arg)
 
     Mat converted_image;
     imshow_init();
+    color_object_init();
 
     while(!(is_quit() || video_quit))
     {
@@ -115,12 +117,34 @@ static void* receive_video_udp(void* arg)
             find_green_object(converted_image, &green_obj);
             find_blue_object(converted_image, &blue_obj);
 
-            if(red_obj.is_recognized)
-                imshow_request("red_obj", red_obj.thresholded_image);
-            if(green_obj.is_recognized)
-                imshow_request("green_obj", green_obj.thresholded_image);
-            if(blue_obj.is_recognized)
-                imshow_request("blue_obj", blue_obj.thresholded_image);
+            //shape detection
+            shape_object_t red_obj_shape;
+            shape_object_t green_obj_shape;
+            shape_object_t blue_obj_shape;
+            check_shape(red_obj.thresholded_image, &red_obj_shape);
+            check_shape(green_obj.thresholded_image, &green_obj_shape);
+            check_shape(blue_obj.thresholded_image, &blue_obj_shape);
+
+            if(red_obj.is_recognized || green_obj.is_recognized || blue_obj.is_recognized)
+            {
+                Mat mask;
+                converted_image.copyTo(mask);
+                for(int i = 0; i < red_obj_shape.detected_num; i++)
+                {
+                    draw_label(mask, red_obj_shape.type[i], red_obj_shape.position[i]);
+                }
+
+                for(int i = 0; i < green_obj_shape.detected_num; i++)
+                {
+                    draw_label(mask, green_obj_shape.type[i], green_obj_shape.position[i]);
+                }
+
+                for(int i = 0; i < blue_obj_shape.detected_num; i++)
+                {
+                    draw_label(mask, blue_obj_shape.type[i], blue_obj_shape.position[i]);
+                }
+                imshow_request("shape_test", mask);
+            }
 
             //optical flow
             opt_flow_t flow_info;
