@@ -376,13 +376,12 @@ static void* send_msp_thread(void* arg)
                 case 1:
                     msp_send_rc();
                     cmd_state++;
-                    break;
                 default:
                     cmd_state = 0;
                     break;
             }
 
-            usleep(10000);
+            usleep(50000);
         }
         else //testing mode
         {

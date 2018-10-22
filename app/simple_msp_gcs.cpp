@@ -581,6 +581,7 @@ int main(int argc, char* argv[])
                          << '\t' << drone_info.rcData[1]
                          << '\t' << drone_info.rcData[2]
                          << '\t' << drone_info.rcData[3]
+                         << '\t' << drone_info.rcData[4]
                          << '\t' << endl;
             }
             pre_log_t = chrono::high_resolution_clock::now();
