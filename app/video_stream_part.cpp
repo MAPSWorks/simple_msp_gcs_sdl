@@ -11,7 +11,10 @@
 #include "../rpi-udp-stream-client/computer_vision/get_optical_flow.h"
 #include "../rpi-udp-stream-client/computer_vision/pos_compensation.h"
 
+#include "shape_detection_mode.h"
+
 #include "opencv2/opencv.hpp"
+#include <string>
 using namespace cv;
 
 static pthread_t receive_id;
@@ -92,6 +95,7 @@ static void* receive_video_udp(void* arg)
     Mat converted_image;
     imshow_init();
     color_object_init();
+    shape_init();
 
     while(!(is_quit() || video_quit))
     {
@@ -117,6 +121,10 @@ static void* receive_video_udp(void* arg)
             find_green_object(converted_image, &green_obj);
             find_blue_object(converted_image, &blue_obj);
 
+            imshow_request("red", red_obj.thresholded_image);
+            imshow_request("blue", blue_obj.thresholded_image);
+            imshow_request("green", green_obj.thresholded_image);
+
             //shape detection
             shape_object_t red_obj_shape;
             shape_object_t green_obj_shape;
@@ -125,6 +133,11 @@ static void* receive_video_udp(void* arg)
             check_shape(green_obj.thresholded_image, &green_obj_shape);
             check_shape(blue_obj.thresholded_image, &blue_obj_shape);
 
+            imshow_request("red_edge", red_obj_shape.thresholded_image);
+            imshow_request("blue_edge", blue_obj_shape.thresholded_image);
+            imshow_request("green_edge", green_obj_shape.thresholded_image);
+
+            //draw detected object info
             if(red_obj.is_recognized || green_obj.is_recognized || blue_obj.is_recognized)
             {
                 Mat mask;
@@ -146,6 +159,42 @@ static void* receive_video_udp(void* arg)
                 imshow_request("shape_test", mask);
             }
 
+            //pos_compensation
+            Point2i actual_position;
+            Mat pos_mask;
+            converted_image.copyTo(pos_mask);
+            actual_position = find_position_in_image(converted_image, drone_info.angle[0], drone_info.angle[1], drone_info.height);
+            
+            //find position of drone in world coordinate
+            detected_position_t detected_position;
+            get_postion_from_marker(actual_position,
+                                    &red_obj,
+                                    &blue_obj,
+                                    &green_obj,
+                                    &red_obj_shape,
+                                    &blue_obj_shape,
+                                    &green_obj_shape,
+                                    &detected_position);
+            
+            circle(pos_mask, actual_position, 5, Scalar(125,125,125), CV_FILLED, 1, 0);
+            for(int i = 0; i < red_obj_shape.detected_num; i++)
+            {
+                circle(pos_mask, red_obj_shape.position[i], 5, Scalar(0,0,255), CV_FILLED, 1, 0);
+            }
+            for(int i = 0; i < blue_obj_shape.detected_num; i++)
+            {
+                circle(pos_mask, blue_obj_shape.position[i], 5, Scalar(255,125,0), CV_FILLED, 1, 0);
+            }
+            for(int i = 0; i < green_obj_shape.detected_num; i++)
+            {
+                circle(pos_mask, green_obj_shape.position[i], 5, Scalar(0,255,0), CV_FILLED, 1, 0);
+            }
+            string pos_string = std::to_string(detected_position.x) + ',' + std::to_string(detected_position.y);
+            string pixel_diff_string = std::to_string(detected_position.x_diff) + ',' + std::to_string(detected_position.y_diff);
+            cv::putText(pos_mask, "World coordination " + pos_string, Point(20,20), cv::FONT_HERSHEY_SIMPLEX, 0.8, CV_RGB(0, 125, 255), 2, 8);	
+            cv::putText(pos_mask, "Pixel difference " + pixel_diff_string, Point(20,40), cv::FONT_HERSHEY_SIMPLEX, 0.8, CV_RGB(0, 125, 255), 2, 8);	
+            imshow_request("position_info", pos_mask);
+
             //optical flow
             opt_flow_t flow_info;
             get_optical_flow(converted_image, &flow_info);
@@ -155,14 +204,6 @@ static void* receive_video_udp(void* arg)
             {
                 imshow_request("masked_img", flow_info.masked_img);
             }
-
-            //pos_compensation
-            Point2i actual_position;
-            Mat pos_mask;
-            converted_image.copyTo(pos_mask);
-            actual_position = find_position_in_image(converted_image, drone_info.angle[0], drone_info.angle[1], drone_info.height);
-            circle(pos_mask, actual_position, 5, Scalar(0,0,255), CV_FILLED, 1, 0);
-            imshow_request("actual_position", pos_mask);
 
             save_this_frame(converted_image);
             imshow_request("convert", converted_image);
