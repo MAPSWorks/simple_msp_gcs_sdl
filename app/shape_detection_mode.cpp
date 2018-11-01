@@ -1,9 +1,55 @@
 #include "shape_detection_mode.h"
-
+#include "../rpi-udp-stream-client/common_util/common_util.h"
 #include "opencv2/opencv.hpp"
+#include <vector>
+using namespace std;
 using namespace cv;
 
-void get_postion_from_marker(Point2i actual_position,
+static bool filter_noise(detected_position_t* input, detected_position_t* output)
+{
+    bool retval = false;
+
+    static int sample_count = 0;
+    const int max_sample = 3;
+
+    static vector<int> x(max_sample);
+    static vector<int> y(max_sample);
+    static vector<int> x_diff(max_sample);
+    static vector<int> y_diff(max_sample);
+
+    x.push_back(input->x);
+    y.push_back(input->y);
+    x_diff.push_back(input->x_diff);
+    y_diff.push_back(input->y_diff);
+    sample_count++;
+
+    if(sample_count == 3)
+    {
+        sample_count = 0;
+
+        sort(x.begin(), x.end());
+        sort(y.begin(), y.end());
+        sort(x_diff.begin(), x_diff.end());
+        sort(y_diff.begin(), y_diff.end());
+
+        output->x = x[1];
+        output->y = y[1];
+        output->x_diff = x_diff[1];
+        output->y_diff = y_diff[1];
+        output->detected = 1;
+
+        x.clear();
+        y.clear();
+        x_diff.clear();
+        y_diff.clear();
+
+        retval = true;
+    }
+
+    return retval;
+}
+
+bool get_postion_from_marker(Point2i actual_position,
                              color_object_t* red_obj, 
                              color_object_t* blue_obj,
                              color_object_t* green_obj, 
@@ -12,6 +58,8 @@ void get_postion_from_marker(Point2i actual_position,
                              shape_object_t* green_shape, 
                              detected_position_t* detected_position)
 {
+    bool retval = false;
+    
     //default info of detected position structure
     detected_position->detected = false;
     detected_position->x = 0;
@@ -135,5 +183,15 @@ void get_postion_from_marker(Point2i actual_position,
                 break;
             }
         }
+        
+        if(detected_position->detected)
+        {
+            if(filter_noise(detected_position, detected_position))
+            {
+                retval = true;
+            }
+        }
     }
+
+    return retval;
 }

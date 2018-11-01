@@ -86,7 +86,7 @@ void gui_init()
     DEBUG_MSG("Renderer   : %s\n", glGetStringAPI(GL_RENDERER));
     DEBUG_MSG("Version    : %s\n", glGetStringAPI(GL_VERSION));
 
-    screen = new Screen( window, Vector2i(winWidth, winHeight), "NanoGUI test");
+    screen = new Screen( window, Vector2i(winWidth, winHeight), "Simple MSP GCS");
 
     gui = new FormHelper(screen);
 }

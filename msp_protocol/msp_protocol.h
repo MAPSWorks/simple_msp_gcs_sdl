@@ -120,6 +120,7 @@ void msp_set_trim_left();
 void msp_set_trim_right();
 
 void msp_set_flow_output(int16_t x, int16_t y);
+void msp_set_marker_track(int16_t x, int16_t y);
 
 void msp_test_enable(uint8_t enable);
 void msp_test_set(uint8_t send_size, uint8_t receive_size, uint32_t send_interval, uint16_t send_count);

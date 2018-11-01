@@ -28,8 +28,10 @@ static FormHelper* gui;
 //Drone's information
 static drone_info_t drone_info = {0, };
 static opt_flow_t flow;
+static detected_position_t maker_pos;
 static int16_t flow_mode_output[2];
 static bool flow_mode_state = 0;
+static bool maker_track_state = 0;
 
 //Throttle control mode
 static int16_t throttle_val = 0;
@@ -328,6 +330,19 @@ static void app_init()
                 msp_test_save();
             });
 
+    nanogui::ref<Window> rwindow13 = gui->addWindow(Eigen::Vector2i(880, 450), "Flow mode");
+    gui->addGroup("Marker track");
+    gui->addButton("Marker track start", []()
+            {
+                DEBUG_MSG("Start marker track mode\n");
+                maker_track_state = 1;
+            });
+    gui->addButton("Marker track stop", []()
+            {
+                DEBUG_MSG("Stop marker track mode\n");
+                maker_track_state = 0;
+            });
+
     gui_set_done();
 }
 
@@ -360,6 +375,7 @@ int main(int argc, char* argv[])
     auto pre_display_t = chrono::high_resolution_clock::now();
     auto pre_log_t = chrono::high_resolution_clock::now();
     auto pre_flow_t = chrono::high_resolution_clock::now();
+    auto pre_marker_t = chrono::high_resolution_clock::now();
 
     while(!is_quit())
     {
@@ -557,6 +573,24 @@ int main(int argc, char* argv[])
                 msp_set_flow_output(0, 0);
 
             pre_flow_t = chrono::high_resolution_clock::now();
+        }
+
+        // marker track mode
+        auto current_marker_t = chrono::high_resolution_clock::now();
+        auto marker_elapsed = chrono::duration_cast<chrono::milliseconds>(current_marker_t - pre_marker_t);
+
+        if(marker_elapsed.count() >20)
+        {
+            if(maker_track_state)
+            {
+                get_maker_track_data(&maker_pos);
+
+                msp_set_marker_track(maker_pos.x_diff, maker_pos.y_diff);
+            }
+            else
+                msp_set_marker_track(0, 0);
+
+            pre_marker_t = chrono::high_resolution_clock::now();
         }
 
         // loggging

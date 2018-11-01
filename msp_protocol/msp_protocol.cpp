@@ -25,6 +25,7 @@ static uint8_t msp_mag_calib_request = 0;
 static uint8_t msp_eeprom_write_request = 0;
 
 static int16_t flow_output[2];
+static int16_t marker_track[2];
 
 enum
 {
@@ -300,8 +301,8 @@ static int msp_parse_cmd(uint8_t* received_cmd, uint8_t* received_size, uint8_t*
 static void msp_send_rc()
 {
     uint8_t rc[5];
-    rc[rcRoll]      = RC_MID + roll_input + flow_output[0];
-    rc[rcPitch]     = RC_MID + pitch_input + flow_output[1];
+    rc[rcRoll]      = RC_MID + roll_input + flow_output[0] + marker_track[0];
+    rc[rcPitch]     = RC_MID + pitch_input + flow_output[1] + marker_track[1];
     rc[rcYaw]       = RC_MID + yaw_input;
     rc[rcThrottle]  = RC_MIN + throttle_input;
     rc[rcAux1]      = RC_MIN + althold_switch_input;
@@ -566,4 +567,10 @@ void msp_set_flow_output(int16_t x, int16_t y)
         flow_output[1] = -25;
     else
         flow_output[1] = y;
+}
+
+void msp_set_marker_track(int16_t x, int16_t y)
+{
+    marker_track[0] = x / 3;
+    marker_track[1] = -y / 3;
 }

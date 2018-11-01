@@ -9,6 +9,7 @@
 
 #include "../rpi-udp-stream-client/computer_vision/color_object_recognition.h"
 #include "../rpi-udp-stream-client/computer_vision/get_optical_flow.h"
+#include "shape_detection_mode.h"
 
 void set_video_quit();
 void reset_video_quit();
@@ -20,5 +21,6 @@ void video_start();
 void video_stop();
 
 void get_opt_flow_data(opt_flow_t* flow);
+void get_maker_track_data(detected_position_t* marker);
 
 #endif

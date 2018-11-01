@@ -16,7 +16,7 @@ typedef struct detected_position_t
     int y_diff;
 } detected_position_t;
 
-void get_postion_from_marker(cv::Point2i actual_position, 
+bool get_postion_from_marker(cv::Point2i actual_position, 
                              color_object_t* red_obj, 
                              color_object_t* blue_obj,
                              color_object_t* green_obj, 
